@@ -30,6 +30,33 @@
     <number>3</number>
    </property>
    <item>
+    <layout class="QHBoxLayout" name="searchLayout">
+     <property name="leftMargin">
+      <number>3</number>
+     </property>
+     <property name="rightMargin">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="lblSearch">
+       <property name="text">
+        <string>Search:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="txtSearch">
+       <property name="placeholderText">
+        <string>Search messages...</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QSplitter" name="splitter">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -162,11 +189,12 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <tabstops>
-  <tabstop>tvMsgList</tabstop>
-  <tabstop>btnClose</tabstop>
-  <tabstop>btnClearHistory</tabstop>
- </tabstops>
+  <tabstops>
+   <tabstop>txtSearch</tabstop>
+   <tabstop>tvMsgList</tabstop>
+   <tabstop>btnClose</tabstop>
+   <tabstop>btnClearHistory</tabstop>
+  </tabstops>
  <resources/>
  <connections>
   <connection>

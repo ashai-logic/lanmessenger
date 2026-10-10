@@ -39,6 +39,17 @@ lmcSettingsBase::lmcSettingsBase(Format format, Scope scope, const QString& orga
 lmcSettingsBase::~lmcSettingsBase(void) {
 }
 
+QString lmcSettings::settingsPath(void) {
+	if(StdLocation::isPortable())
+		return QDir::toNativeSeparators(StdLocation::dataDir() + "/" IDA_PRODUCT ".ini");
+	QSettings defaultSettings(QSettings::IniFormat, QSettings::UserScope, IDA_COMPANY, IDA_PRODUCT);
+	return defaultSettings.fileName();
+}
+
+lmcSettings::lmcSettings(void) :
+	lmcSettingsBase(settingsPath(), QSettings::IniFormat) {
+}
+
 void lmcSettingsBase::setValue(const QString& key, const QVariant& value, const QVariant& defaultValue) {
     if(value != defaultValue)
         QSettings::setValue(key, value);

@@ -34,15 +34,17 @@
 #define IDS_VERSION				"Application/Version"
 #define IDS_VERSION_VAL			"1.2.10"
 #define IDS_OPENPATH			"Application/OpenPath"
-#define IDS_OPENPATH_VAL		QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+#define IDS_OPENPATH_VAL		StdLocation::defaultOpenSavePath()
 #define IDS_SAVEPATH			"Application/SavePath"
-#define IDS_SAVEPATH_VAL		QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+#define IDS_SAVEPATH_VAL		StdLocation::defaultOpenSavePath()
 #define IDS_WINDOWMAIN			"Window/Main"
 #define IDS_WINDOWTRANSFERS		"Window/Transfers"
 #define IDS_WINDOWHISTORY		"Window/History"
 #define IDS_WINDOWBROADCAST		"Window/Broadcast"
 #define IDS_WINDOWHELP			"Window/Help"
 #define IDS_WINDOWPUBLICCHAT	"Window/PublicChat"
+#define IDS_WINDOWCHAT			"Window/Chat"
+#define IDS_SPLITTERCHAT		"Splitter/Chat"
 #define IDS_SPLITTERHISTORY		"Splitter/History"
 #define IDS_SPLITTERBROADCAST	"Splitter/Broadcast"
 #define IDS_SPLITTERPUBLICCHATH	"Splitter/PublicChatH"
@@ -82,7 +84,7 @@
 #define IDS_TRIMMESSAGE			"Messages/Trim"
 #define IDS_TRIMMESSAGE_VAL		true
 #define IDS_CLEARONCLOSE        "Messages/ClearOnClose"
-#define IDS_CLEARONCLOSE_VAL    true
+#define IDS_CLEARONCLOSE_VAL    false
 #define IDS_MESSAGETOP			"Messages/MessageTop"
 #define IDS_MESSAGETOP_VAL		false
 #define IDS_PUBMESSAGEPOP		"Messages/PubMessagePop"
@@ -188,7 +190,7 @@ public:
 
 class lmcSettings : public lmcSettingsBase {
 public:
-	lmcSettings(void) : lmcSettingsBase(QSettings::IniFormat, QSettings::UserScope, IDA_COMPANY, IDA_PRODUCT) {}
+	lmcSettings(void);
 	~lmcSettings(void) {}
 
 	bool migrateSettings(void);
@@ -197,6 +199,7 @@ public:
     static void setAutoStart(bool on);
 
 private:
+	static QString settingsPath(void);
 	bool migrateSettings(const QString& configFile);
 };
 

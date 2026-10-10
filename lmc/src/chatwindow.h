@@ -58,9 +58,11 @@ public:
 
 	void init(User* pLocalUser, User* pRemoteUser, bool connected);
     void stop(void);
+	void show(void);
 	void receiveMessage(MessageType type, QString* lpszUserId, XmlMessage* pMessage);
 	void connectionStateChanged(bool connected);
 	void settingsChanged(void);
+	void historyCleared(const QString& peerId);
 
 	QString localId;
 	QHash<QString, QString> peerIds;
@@ -69,7 +71,7 @@ public:
 
 signals:
 	void messageSent(MessageType type, QString* lpszUserId, XmlMessage* pMessage);
-	void showHistory(void);
+	void showHistory(QString* lpszUserId, QString* lpszUserName);
 	void showTransfers(void);
 	void closed(QString* lpszUserId);
 
@@ -101,8 +103,11 @@ private:
     void sendFolder(QString* lpszFolderPath);
     void sendObject(MessageType type, QString* lpszPath);
 	void encodeMessage(QString* lpszMessage);
-    void processFileOp(XmlMessage* pMessage);
+	void processFileOp(XmlMessage* pMessage);
 	void appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage);
+	void persistHistoryMessage(int index);
+	QString historyUserName(void);
+	QString historyUserId(void);
 	void updateFileMessage(FileMode mode, FileOp op, QString fileId);
 	void showStatus(int flag, bool add);
 	QString getWindowTitle(void);
@@ -136,13 +141,13 @@ private:
 	int infoFlag;
 	bool showSmiley;
 	bool sendKeyMod;
-    bool clearOnClose;
+	bool clearOnClose;
 	lmcSoundPlayer* pSoundPlayer;
 	QColor messageColor;
 	ChatState chatState;
 	qint64 keyStroke;
 	qint64 snapKeyStroke;
-	bool dataSaved;
+	bool windowLoaded;
 };
 
 #endif // CHATWINDOW_H

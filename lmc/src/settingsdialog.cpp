@@ -216,7 +216,7 @@ void lmcSettingsDialog::rdbSysHistoryPath_toggled(bool checked) {
 	ui.btnHistoryPath->setEnabled(!checked);
 
 	if(!checked)
-		ui.txtHistoryPath->setText(History::historyFile());
+		ui.txtHistoryPath->setText(HistoryStore::historyFile());
 	else
 		ui.txtHistoryPath->clear();
 }
@@ -236,8 +236,7 @@ void lmcSettingsDialog::btnFilePath_clicked(void) {
 }
 
 void lmcSettingsDialog::btnClearHistory_clicked(void) {
-	QFile::remove(History::historyFile());
-	emit historyCleared();
+	HistoryStore::instance()->clearAll();
 }
 
 void lmcSettingsDialog::btnClearFileHistory_clicked(void) {
@@ -471,10 +470,6 @@ void lmcSettingsDialog::setUIText(void) {
 
 	for(int index = 0; index < ULV_Max; index++)
 		ui.cboUserListView->setItemText(index, lmcStrings::userListView()[index]);
-
-	QString updateLink = QString(IDA_DOMAIN"/downloads.php#translations");
-	ui.lblUpdateLink->setText("<a href='" + updateLink + "'><span style='text-decoration: underline; color:#0000ff;'>" + 
-		tr("Check for updates") + "</span></a>");
 
 	cboTheme_currentIndexChanged(ui.cboTheme->currentIndex());
 

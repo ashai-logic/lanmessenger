@@ -1,3 +1,8 @@
+/* LAN Messenger Application (lmcapp)
+ * Copyright (c) 2010 - 2012 Qualia Digital Solutions.
+ * Modified by ASHAI, 2026.
+ */
+
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
@@ -22,7 +27,7 @@ FILESUBTYPE     0x0L
 			VALUE "FileDescription",  "LAN Messenger Application\0"
 			VALUE "FileVersion",      "2.0.0\0"
 			VALUE "InternalName",     "lmcapp\0"
-			VALUE "LegalCopyright",   "Copyright © 2010-2012 Qualia Digital Solutions.\0"
+			VALUE "LegalCopyright",   "Copyright (C) 2010-2011 Dilip Radhakrishnan. Copyright (C) 2010-2012 Qualia Digital Solutions. Copyright (C) 2026 ASHAI.\0"
 			VALUE "OriginalFilename", "lmcapp2.dll\0"
             VALUE "ProductName",      "LAN Messenger\0"
 			VALUE "ProductVersion",   "2.0.0\0"

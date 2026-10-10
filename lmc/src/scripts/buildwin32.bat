@@ -44,8 +44,8 @@ echo %2
 ::xcopy %QTDIR%\plugins\imageformats\qtiffd4.dll %1\imageformats /I /F /Y
 
 echo Copying libraries
-copy /Y ..\..\lmcapp\bin\lmcappd2.dll %1\lmcappd2.dll
-copy /Y ..\..\openssl\bin\libeay32.dll %1\libeay32.dll
+copy /Y third_party\openssl\bin\libcrypto-4.dll %1\libcrypto-4.dll
+copy /Y third_party\openssl\bin\libssl-4.dll %1\libssl-4.dll
 goto end
 
 :release_mode
@@ -55,8 +55,8 @@ goto end
 ::xcopy %QTDIR%\plugins\imageformats\qtiff4.dll %1\imageformats /I /F /Y
 
 echo Copying libraries
-copy /Y ..\..\lmcapp\bin\lmcapp2.dll %1\lmcapp2.dll
-copy /Y ..\..\openssl\bin\libeay32.dll %1\libeay32.dll
+copy /Y third_party\openssl\bin\libcrypto-4.dll %1\libcrypto-4.dll
+copy /Y third_party\openssl\bin\libssl-4.dll %1\libssl-4.dll
 goto end
 
 :null_param

@@ -66,6 +66,7 @@ public:
 	void receiveMessage(MessageType type, QString* lpszUserId, XmlMessage* pMessage);
 	void connectionStateChanged(bool connected);
 	void settingsChanged(void);
+	void historyCleared(const QString& threadId);
 	void selectContacts(QStringList* selectedContacts);
 
 	QString threadId;
@@ -103,6 +104,7 @@ private:
 	void sendMessage(void);
 	void encodeMessage(QString* lpszMessage);
 	void appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage);
+	void persistHistoryMessage(int index);
 	void showStatus(int flag, bool add);
 	QString getWindowTitle(void);
 	void setMessageFont(QFont& font);

@@ -2,6 +2,9 @@
 #
 # LAN Messenger project file
 #
+# Copyright (c) 2010 - 2012 Qualia Digital Solutions.
+# Modified by ASHAI, 2026.
+#
 #-------------------------------------------------
 
 QT += core gui network xml widgets sql
@@ -58,7 +61,8 @@ SOURCES += \
     subcontrols.cpp \
     trace.cpp \
     filemessagingproc.cpp \
-    qmessagebrowser.cpp
+    qmessagebrowser.cpp \
+    signature.cpp
 
 HEADERS  += \
     usertreewidget.h \
@@ -105,7 +109,8 @@ HEADERS  += \
     userselectdialog.h \
     subcontrols.h \
     trace.h \
-    qmessagebrowser.h
+    qmessagebrowser.h \
+    signature.h
 
 FORMS += \
     transferwindow.ui \
@@ -152,8 +157,8 @@ win32-msvc* {
 
 win32: {
     CONFIG -= debug_and_release debug_and_release_target
-    LMCAPP_PATH = $$replace(OUT_PWD, lmc, lmcapp)
-    LIBS += -L$$LMCAPP_PATH -llmcapp
+    DESTDIR = ../release
+    LIBS += -L$$PWD/../../lmcapp/lib -llmcapp
 }
 unix:!symbian: {
     CONFIG(debug, debug|release) {
@@ -167,9 +172,13 @@ unix:!symbian: {
 INCLUDEPATH += $$PWD/../../lmcapp/include
 DEPENDPATH += $$PWD/../../lmcapp/include
 
-win32-msvc*: LIBS += advapi32.lib # for GetUserNameW(...) in Helper::getLogonName(..)
-win32: LIBS += -L$$PWD/../../openssl/lib/ -llibeay32
-unix:!symbian: LIBS += -L$$PWD/../../openssl/lib/ -lcrypto
+win32-g++ {
+    QMAKE_LFLAGS += -static
+}
 
-INCLUDEPATH += $$PWD/../../openssl/include
-DEPENDPATH += $$PWD/../../openssl/include
+win32-msvc*: LIBS += advapi32.lib # for GetUserNameW(...) in Helper::getLogonName(..)
+win32: LIBS += $$PWD/third_party/openssl/lib/MinGW/x86/libcrypto.dll.a
+unix:!symbian: LIBS += -L$$PWD/third_party/openssl/lib/ -lcrypto
+
+INCLUDEPATH += $$PWD/third_party/openssl/include
+DEPENDPATH += $$PWD/third_party/openssl/include

@@ -29,6 +29,8 @@
 #include <QFileInfo>
 #include <QDesktopServices>
 #include <QDateTime>
+#include <QApplication>
+#include <QFile>
 #include "settings.h"
 
 #define SL_TRANSFERHISTORY		"transfers.lst"
@@ -44,23 +46,44 @@
 
 class StdLocation {
 public:
+	static bool isPortable(void) {
+		return QFile::exists(QDir::toNativeSeparators(
+			QApplication::applicationDirPath() + "/portable"));
+	}
+
+	static QString dataDir(void) {
+		if(isPortable())
+			return QDir::toNativeSeparators(QApplication::applicationDirPath() + "/data");
+		return QDir::toNativeSeparators(QStandardPaths::writableLocation(
+			QStandardPaths::DataLocation));
+	}
+
+	static QString defaultOpenSavePath(void) {
+		if(isPortable())
+			return dataDir();
+		return QDir::toNativeSeparators(QStandardPaths::writableLocation(
+			QStandardPaths::DocumentsLocation));
+	}
+
 	static QString transferHistory(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_TRANSFERHISTORY);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_TRANSFERHISTORY);
 	}
 
 	static QString fileStorageDir(void) {
 		lmcSettings settings;
 
-        QString path = QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DocumentsLocation) + "/" SL_FILESTORAGEDIR);
+		QString path;
+		if(isPortable())
+			path = QDir::toNativeSeparators(dataDir() + "/" SL_FILESTORAGEDIR);
+		else
+			path = QDir::toNativeSeparators(QStandardPaths::writableLocation(
+				QStandardPaths::DocumentsLocation) + "/" SL_FILESTORAGEDIR);
 		path = settings.value(IDS_FILESTORAGEPATH, path).toString();
 		return path;
 	}
 
 	static QString cacheDir(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_CACHEDIR);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_CACHEDIR);
 	}
 
 	static QString libDir(void) {
@@ -80,8 +103,7 @@ public:
 	}
 
 	static QString userLangDir(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_LANGDIR);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_LANGDIR);
 	}
 
 	static QString resThemeDir(void) {
@@ -93,23 +115,19 @@ public:
 	}
 
 	static QString userThemeDir(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_THEMEDIR);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_THEMEDIR);
 	}
 
 	static QString groupFile(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_GROUPFILE);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_GROUPFILE);
 	}
 
 	static QString avatarFile(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_AVATARFILE);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_AVATARFILE);
 	}
 
 	static QString logDir(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::DataLocation) + "/" SL_LOGDIR);
+		return QDir::toNativeSeparators(dataDir() + "/" SL_LOGDIR);
 	}
 
 	static QString freeLogFile(void) {
@@ -119,8 +137,10 @@ public:
 	}
 
 	static QString tempConfigFile(void) {
-        return QDir::toNativeSeparators(QStandardPaths::writableLocation(
-            QStandardPaths::TempLocation) + "/" SL_TEMPCONFIG);
+		if(isPortable())
+			return QDir::toNativeSeparators(dataDir() + "/" SL_TEMPCONFIG);
+		return QDir::toNativeSeparators(QStandardPaths::writableLocation(
+			QStandardPaths::TempLocation) + "/" SL_TEMPCONFIG);
 	}
 };
 

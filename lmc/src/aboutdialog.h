@@ -19,6 +19,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
 **
+** Modified by ASHAI, 2026.
+**
 ****************************************************************************/
 
 
@@ -30,6 +32,7 @@
 #include "ui_aboutdialog.h"
 #include "shared.h"
 #include "settings.h"
+#include "signature.h"
 
 class lmcAboutDialog : public QDialog {
 	Q_OBJECT
@@ -46,9 +49,11 @@ protected:
 
 private:
 	void setUIText(void);
+	QString signatureText(void);
 
 	Ui::AboutDialog ui;
 	lmcSettings* pSettings;
+	SignatureStatus signatureStatus;
 };
 
 #endif // ABOUTDIALOG_H

@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** This file is part of LAN Messenger.
 ** 
@@ -18,6 +18,8 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
+**
+** Modified by ASHAI, 2026.
 **
 ****************************************************************************/
 
@@ -101,8 +103,6 @@ private slots:
 	void avatarAction_triggered(void);
 	void avatarBrowseAction_triggered(void);
 	void helpAction_triggered(void);
-	void homePageAction_triggered(void);
-	void updateAction_triggered(void);
 	void chatRoomAction_triggered(void);
 	void publicChatAction_triggered(void);
 	void refreshAction_triggered(void);
@@ -188,8 +188,6 @@ private:
 	QAction* transferAction;
 	QAction* settingsAction;
 	QAction* helpAction;
-	QAction* onlineAction;
-	QAction* updateAction;
 	QAction* aboutAction;
 	QAction* trayShowAction;
 	QAction* trayStatusAction;

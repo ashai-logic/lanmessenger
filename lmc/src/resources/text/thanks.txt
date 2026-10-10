@@ -22,3 +22,27 @@ Victor Alekseevich Khokhlov - Russian localization
 
 Some of the images used were created by Mythique Design and used under the Creative Commons Public License.
 (http://mythique-design.servhome.org)
+
+
+-----------------------------
+
+Third-party components and licensing:
+
+- Qt 5.12.12 (https://www.qt.io/), statically linked.
+  Used under the terms of the GNU General Public License version 3 (GPLv3).
+  Qt source code:
+  https://download.qt.io/archive/qt/5.12/5.12.12/single/qt-everywhere-src-5.12.12.tar.xz
+- Qt Solutions components (lmcapp: QtSingleApplication, QtLockedFile, QtLocalPeer),
+  Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies). Dual-licensed
+  under LGPL 2.1 / GPLv3 (Nokia Qt LGPL Exception 1.0); used here under GPLv3.
+- OpenSSL 4.0.1, Copyright (C) 1998-2024 The OpenSSL Project. Apache License 2.0
+  (see license-openssl.txt and notice-openssl.txt).
+- Some of the images are created by Mythique Design and used under the
+  Creative Commons Public License.
+
+This is an unofficial fork of LAN Messenger. It is not affiliated with or
+endorsed by Qualia Digital Solutions or the original LAN Messenger project.
+
+Source code: https://github.com/ashai-logic/lanmessenger
+Contact: ashai.logic@gmail.com
+Modified by ASHAI, 2026.

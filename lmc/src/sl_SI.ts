@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.0" language="sl_SI">
+<!DOCTYPE TS[]>
+<!--
+    LAN Messenger
+    Copyright (c) 2010 - 2012 Qualia Digital Solutions.
+    Modified by ASHAI, 2026.
+-->
+<TS version="2.1" language="sl_SI">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -34,6 +39,10 @@
     <message>
         <source>Close</source>
         <translation>Zapri</translation>
+    </message>
+    <message>
+        <source>&lt;_Qt Version&gt;</source>
+        <translation>&lt;_Qt Version&gt;</translation>
     </message>
 </context>
 <context>
@@ -144,6 +153,14 @@
     <message>
         <source>Close</source>
         <translation>Zapri</translation>
+    </message>
+    <message>
+        <source>Search:</source>
+        <translation>Iskanje:</translation>
+    </message>
+    <message>
+        <source>Search messages...</source>
+        <translation>Iskanje sporočil...</translation>
     </message>
 </context>
 <context>
@@ -393,11 +410,11 @@
     </message>
     <message>
         <source>Suspend alerts when my status is Busy</source>
-        <translation>Ne prikaži opozoril, ko sem &quot;Zaseden&quot;</translation>
+        <translation>Ne prikaži opozoril, ko sem "Zaseden"</translation>
     </message>
     <message>
         <source>Suspend alerts when my status is Do Not Disturb</source>
-        <translation>Ne prikaži opozoril, ko je moj status &quot;Ne moti&quot;</translation>
+        <translation>Ne prikaži opozoril, ko je moj status "Ne moti"</translation>
     </message>
     <message>
         <source>Sounds</source>
@@ -413,11 +430,11 @@
     </message>
     <message>
         <source>Suspend sounds when my status is Busy</source>
-        <translation>Ne uporabljaj zvokov, ko sem &quot;Zaseden&quot;</translation>
+        <translation>Ne uporabljaj zvokov, ko sem "Zaseden"</translation>
     </message>
     <message>
         <source>Suspend sound when my status is Do Not Disturb</source>
-        <translation>Ne uporabi zvokov, ko je moj status &quot;Ne moti&quot;</translation>
+        <translation>Ne uporabi zvokov, ko je moj status "Ne moti"</translation>
     </message>
     <message>
         <source>Connection</source>
@@ -521,39 +538,43 @@
     </message>
     <message>
         <source>Broadcast</source>
-        <translation type="unfinished"></translation>
+        <translation>Oddajanje</translation>
     </message>
     <message>
         <source>&lt;- Add</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;- Dodaj</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Izbriši</translation>
     </message>
     <message>
         <source>Advanced</source>
-        <translation type="unfinished"></translation>
+        <translation>Napredno</translation>
     </message>
     <message>
         <source>Multicast address:</source>
-        <translation type="unfinished"></translation>
+        <translation>Naslov multipleksiranja:</translation>
     </message>
     <message>
         <source>Broadcast list:</source>
-        <translation type="unfinished"></translation>
+        <translation>Seznam oddajanja:</translation>
     </message>
     <message>
         <source>Apply to public messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Uporabi za javna sporočila</translation>
     </message>
     <message>
         <source>Reset All</source>
-        <translation type="unfinished"></translation>
+        <translation>Ponastavi vse</translation>
     </message>
     <message>
         <source>Clear messages when window is closed</source>
-        <translation type="unfinished"></translation>
+        <translation>Počisti sporočila ob zaprtju okna</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Osveži</translation>
     </message>
 </context>
 <context>
@@ -697,6 +718,21 @@
     <message>
         <source>About %1</source>
         <translation>O %1</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.cpp" line="107" />
+        <source>Authorship and integrity verification:</source>
+        <translation>Preverjanje avtorstva in celovitosti:</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.cpp" line="108" />
+        <source>OK</source>
+        <translation>V REDU</translation>
+    </message>
+    <message>
+        <location filename="aboutdialog.cpp" line="109" />
+        <source>FAILED</source>
+        <translation>NI USPELO</translation>
     </message>
 </context>
 <context>
@@ -917,15 +953,15 @@
     </message>
     <message>
         <source>%1 sends a folder...</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 pošilja mapo...</translation>
     </message>
     <message>
         <source>Send A Fol&amp;der...</source>
-        <translation type="unfinished"></translation>
+        <translation>Pošlji ma&amp;po...</translation>
     </message>
     <message>
         <source>Send a folder to %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Pošlji mapo osebi %1</translation>
     </message>
 </context>
 <context>
@@ -950,10 +986,12 @@
         <translation>%1 se ne more zagnati, ker drug program uporablja port, ki je nastavljen za uporabo %2.</translation>
     </message>
     <message>
-        <source>Preferences could not be imported from &apos;%1&apos;.
+        <source>Preferences could not be imported from '%1'.
 
 File may not exist, or may not be compatible with this version of %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavitev ni bilo mogoče uvoziti iz '%1'.
+
+Datoteka morda ne obstaja ali ni združljiva s to različico %2.</translation>
     </message>
 </context>
 <context>
@@ -963,8 +1001,12 @@ File may not exist, or may not be compatible with this version of %2.</source>
         <translation>Pomoč</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head&gt;&lt;meta http-equiv=&apos;Content-Type&apos; content=&apos;text/html; charset=utf-8&apos; /&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;Welcome to LAN Messenger Help&lt;/h2&gt;&lt;h3&gt;Help&lt;/h3&gt;&lt;p&gt;You can find documentation on LAN Messenger&apos;s &lt;a href=&apos;%1&apos;&gt;wiki&lt;/a&gt; website.&lt;/p&gt;&lt;p&gt;Before asking any question, please refer yourself to the &lt;a href=&apos;%2&apos;&gt;FAQ&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;You might then get (and give) help on the &lt;a href=&apos;%3&apos;&gt;Support Forums&lt;/a&gt;.&lt;/p&gt;&lt;h3&gt;Contribute to the project&lt;/h3&gt;&lt;p&gt;You can help the LAN Messenger project giving some of your time to help the community, to translate the application or documentation, and to test the program. And of course, you can &lt;b&gt;promote&lt;/b&gt; LAN Messenger.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <source>&lt;html&gt;&lt;head&gt;&lt;meta http-equiv='Content-Type' content='text/html; charset=utf-8' /&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;Welcome to LAN Messenger Help&lt;/h2&gt;&lt;h3&gt;Help&lt;/h3&gt;&lt;p&gt;You can find documentation on LAN Messenger's &lt;a href='%1'&gt;wiki&lt;/a&gt; website.&lt;/p&gt;&lt;p&gt;Before asking any question, please refer yourself to the &lt;a href='%2'&gt;FAQ&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;You might then get (and give) help on the &lt;a href='%3'&gt;Support Forums&lt;/a&gt;.&lt;/p&gt;&lt;h3&gt;Contribute to the project&lt;/h3&gt;&lt;p&gt;You can help the LAN Messenger project giving some of your time to help the community, to translate the application or documentation, and to test the program. And of course, you can &lt;b&gt;promote&lt;/b&gt; LAN Messenger.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="vanished">&lt;html&gt;&lt;head&gt;&lt;meta http-equiv='Content-Type' content='text/html; charset=utf-8' /&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;Dobrodošli v pomoči programa LAN Messenger&lt;/h2&gt;&lt;h3&gt;Pomoč&lt;/h3&gt;&lt;p&gt;Dokumentacijo najdete na &lt;a href='%1'&gt;wikiju&lt;/a&gt; programa LAN Messenger.&lt;/p&gt;&lt;p&gt;Preden zastavite vprašanje, si oglejte &lt;a href='%2'&gt;pogosta vprašanja&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Pomoč lahko nato poiščete (in nudite) na &lt;a href='%3'&gt;forumih za podporo&lt;/a&gt;.&lt;/p&gt;&lt;h3&gt;Prispevajte k projektu&lt;/h3&gt;&lt;p&gt;Projektu LAN Messenger lahko pomagate tako, da namenite nekaj svojega časa skupnosti, prevajate aplikacijo ali dokumentacijo in preizkušate program. Seveda pa lahko LAN Messenger tudi &lt;b&gt;promovirate&lt;/b&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head&gt;&lt;meta http-equiv='Content-Type' content='text/html; charset=utf-8' /&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;Welcome to LAN Messenger Help&lt;/h2&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head&gt;&lt;meta http-equiv='Content-Type' content='text/html; charset=utf-8' /&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;Dobrodošli v pomoči programa LAN Messenger&lt;/h2&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -972,6 +1014,10 @@ File may not exist, or may not be compatible with this version of %2.</source>
     <message>
         <source>Message History</source>
         <translation>Zgodovina sporočil</translation>
+    </message>
+    <message>
+        <source>No messages found.</source>
+        <translation>Ni najdenih sporočil.</translation>
     </message>
 </context>
 <context>
@@ -1005,8 +1051,8 @@ File may not exist, or may not be compatible with this version of %2.</source>
         <translation>Vpiši ime skupine</translation>
     </message>
     <message>
-        <source>A group named &apos;%1&apos; already exists. Please enter a different name.</source>
-        <translation>Skupina &apos;%1&apos; že obstaja. Uporabite drugo ime.</translation>
+        <source>A group named '%1' already exists. Please enter a different name.</source>
+        <translation>Skupina '%1' že obstaja. Uporabite drugo ime.</translation>
     </message>
     <message>
         <source>Rename Group</source>
@@ -1018,7 +1064,7 @@ File may not exist, or may not be compatible with this version of %2.</source>
     </message>
     <message>
         <source>&amp;Messenger</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Messenger</translation>
     </message>
     <message>
         <source>&amp;New Chat Room</source>
@@ -1058,11 +1104,11 @@ File may not exist, or may not be compatible with this version of %2.</source>
     </message>
     <message>
         <source>%1 &amp;online</source>
-        <translation>%1 &amp;na spletu</translation>
+        <translation type="vanished">%1 &amp;na spletu</translation>
     </message>
     <message>
         <source>Check for &amp;Updates...</source>
-        <translation>Preveri &amp;posodobitve...</translation>
+        <translation type="vanished">Preveri &amp;posodobitve...</translation>
     </message>
     <message>
         <source>&amp;About</source>
@@ -1118,7 +1164,7 @@ File may not exist, or may not be compatible with this version of %2.</source>
     </message>
     <message>
         <source>Send Fol&amp;der</source>
-        <translation type="unfinished"></translation>
+        <translation>Pošlji ma&amp;po</translation>
     </message>
 </context>
 <context>
@@ -1136,8 +1182,8 @@ File may not exist, or may not be compatible with this version of %2.</source>
         <translation>Skupinsko sporočilo od %1:</translation>
     </message>
     <message>
-        <source>Sending &apos;%1&apos; to %2.</source>
-        <translation>Pošiljam &apos;%1&apos; %2.</translation>
+        <source>Sending '%1' to %2.</source>
+        <translation>Pošiljam '%1' %2.</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -1213,15 +1259,31 @@ File may not exist, or may not be compatible with this version of %2.</source>
     </message>
     <message>
         <source>%1 is sending you a folder:</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 vam pošilja mapo:</translation>
     </message>
     <message>
         <source>%1 sends you a folder:</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 vam pošlje mapo:</translation>
     </message>
     <message>
         <source>Completed</source>
         <translation>Končano</translation>
+    </message>
+    <message>
+        <source>Sending folder '%1' to %2.</source>
+        <translation>Pošiljanje mape '%1' osebi %2.</translation>
+    </message>
+    <message>
+        <source>Sending file '%1' to %2.</source>
+        <translation>Pošiljanje datoteke '%1' osebi %2.</translation>
+    </message>
+    <message>
+        <source>%1 is sending you a folder: %2</source>
+        <translation>%1 vam pošilja mapo: %2</translation>
+    </message>
+    <message>
+        <source>%1 is sending you a file: %2</source>
+        <translation>%1 vam pošilja datoteko: %2</translation>
     </message>
 </context>
 <context>
@@ -1268,15 +1330,15 @@ File may not exist, or may not be compatible with this version of %2.</source>
     </message>
     <message>
         <source>Check for updates</source>
-        <translation>Preveri posodobitve</translation>
+        <translation type="vanished">Preveri posodobitve</translation>
     </message>
     <message>
         <source>Select sound</source>
-        <translation type="unfinished"></translation>
+        <translation>Izberi zvok</translation>
     </message>
     <message>
         <source>&lt;File Not Found&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;Datoteke ni mogoče najti&gt;</translation>
     </message>
 </context>
 <context>
@@ -1289,7 +1351,9 @@ File may not exist, or may not be compatible with this version of %2.</source>
         <source>LAN Messenger is a free peer-to-peer messaging application for
 intra-network communication and does not require a server.
 LAN Messenger works on essentially every popular desktop platform.</source>
-        <translation type="unfinished"></translation>
+        <translation>LAN Messenger je brezplačna aplikacija za medsebojno sporočanje (peer-to-peer)
+za komunikacijo v lokalnem omrežju in ne potrebuje strežnika.
+LAN Messenger deluje na praktično vseh priljubljenih namiznih platformah.</translation>
     </message>
     <message>
         <source>Automatic</source>
@@ -1399,16 +1463,16 @@ LAN Messenger works on essentially every popular desktop platform.</source>
 <context>
     <name>lmcTransferWindow</name>
     <message>
-        <source>&apos;%1&apos; has been sent to %2.</source>
-        <translation>&apos;%1&apos; je bilo poslano %2.</translation>
+        <source>'%1' has been sent to %2.</source>
+        <translation>'%1' je bilo poslano %2.</translation>
     </message>
     <message>
         <source>File Transfer Completed</source>
         <translation>Prenos datoteke zaključen</translation>
     </message>
     <message>
-        <source>&apos;%1&apos; has been received from %2.</source>
-        <translation>&apos;%1&apos; je bilo prejeto od %2.</translation>
+        <source>'%1' has been received from %2.</source>
+        <translation>'%1' je bilo prejeto od %2.</translation>
     </message>
     <message>
         <source>File Transfers</source>

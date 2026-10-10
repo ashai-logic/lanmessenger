@@ -155,22 +155,36 @@ void lmcChatRoomWindow::show(void) {
 }
 
 void lmcChatRoomWindow::stop(void) {
-	bool saveHistory = pSettings->value(IDS_HISTORY, IDS_HISTORY_VAL).toBool();
-	// Save history if there is conversation to be saved, and option to save history
-	// is enabled, and the conversation was a group conversation.
-	// dataSaved flag is used to ensure that history is saved only once, when the
-	// window is closed by the user or by the application on exit
-	if(pMessageLog->hasData && saveHistory && groupMode && !dataSaved) {
-		QString szMessageLog = pMessageLog->prepareMessageLogForSave();
-		History::save(tr("Group Conversation"), QDateTime::currentDateTime(), &szMessageLog);
-		dataSaved = true;
-	}
-
+	//	Group messages are written to the history database as they arrive.
 	if(!groupMode && windowLoaded) {
 		pSettings->setValue(IDS_WINDOWPUBLICCHAT, saveGeometry());
 		pSettings->setValue(IDS_SPLITTERPUBLICCHATV, ui.vSplitter->saveState());
 		pSettings->setValue(IDS_SPLITTERPUBLICCHATH, ui.hSplitter->saveState());
 	}
+}
+
+void lmcChatRoomWindow::historyCleared(const QString& thread) {
+	if(!groupMode)
+		return;
+	if(!thread.isEmpty() && thread.compare(threadId) != 0)
+		return;
+	pMessageLog->clearMessages();
+}
+
+void lmcChatRoomWindow::persistHistoryMessage(int index) {
+	if(index < 0 || !groupMode)
+		return;
+
+	bool saveHistory = pSettings->value(IDS_HISTORY, IDS_HISTORY_VAL).toBool();
+	if(!saveHistory || !pMessageLog->hasData)
+		return;
+
+	QString html = pMessageLog->historyHtmlAt(index);
+	if(html.isNull())
+		return;
+
+	HistoryStore::instance()->append(threadId, tr("Group Conversation"), true,
+		pMessageLog->historySenderAt(index), pMessageLog->historyTimeAt(index), html);
 }
 
 void lmcChatRoomWindow::addUser(User* pUser) {
@@ -463,8 +477,10 @@ void lmcChatRoomWindow::btnFont_clicked(void) {
 	QFont font = ui.txtMessage->font();
 	font.setPointSize(ui.txtMessage->fontPointSize());
 	QFont newFont = QFontDialog::getFont(&ok, font, this, tr("Select Font"));
-	if(ok)
+	if(ok) {
 		setMessageFont(newFont);
+		pSettings->setValue(IDS_FONT, newFont.toString(), IDS_FONT_VAL);
+	}
 }
 
 void lmcChatRoomWindow::btnFontColor_clicked(void) {
@@ -688,9 +704,10 @@ void lmcChatRoomWindow::encodeMessage(QString* lpszMessage) {
 }
 
 void lmcChatRoomWindow::appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage) {
-	pMessageLog->appendMessageLog(type, lpszUserId, lpszUserName, pMessage);
+	int index = pMessageLog->appendMessageLog(type, lpszUserId, lpszUserName, pMessage);
 	if(!pSaveAction->isEnabled())
 		pSaveAction->setEnabled(pMessageLog->hasData);
+	persistHistoryMessage(index);
 }
 
 void lmcChatRoomWindow::showStatus(int flag, bool add) {

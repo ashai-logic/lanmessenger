@@ -28,6 +28,7 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/aes.h>
+#include <openssl/evp.h>
 
 #ifndef CRYPTO_H
 #define CRYPTO_H
@@ -47,9 +48,11 @@ public:
 	QByteArray publicKey;
 
 private:
+	void freeContexts(void);
+
 	RSA* pRsa;
-	QMap<QString, EVP_CIPHER_CTX> encryptMap;
-	QMap<QString, EVP_CIPHER_CTX> decryptMap;
+	QMap<QString, EVP_CIPHER_CTX*> encryptMap;
+	QMap<QString, EVP_CIPHER_CTX*> decryptMap;
 	int bits;
 	long exponent;
 };

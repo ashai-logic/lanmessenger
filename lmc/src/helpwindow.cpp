@@ -19,6 +19,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
 **
+** Modified by ASHAI, 2026.
+**
 ****************************************************************************/
 
 
@@ -98,10 +100,6 @@ void lmcHelpWindow::setUIText(void) {
 
 	setWindowTitle(tr("Help"));
 
-	QString helpLink = QString(IDA_DOMAIN"/help.php");
-	QString faqLink = QString(IDA_DOMAIN"/faq.php");
-	QString supportLink = QString(IDA_DOMAIN"/support.php");
-
 	QString html = tr(
 		"<html>"
 			"<head>"
@@ -109,21 +107,7 @@ void lmcHelpWindow::setUIText(void) {
 			"</head>"
 			"<body>"
 				"<h2>Welcome to LAN Messenger Help</h2>"
-				"<h3>Help</h3>"
-				"<p>"
-				"You can find documentation on LAN Messenger's <a href='%1'>wiki</a> website."
-				"</p>"
-				"<p>"
-				"Before asking any question, please refer yourself to the <a href='%2'>FAQ</a>."
-				"</p>"
-				"<p>"
-				"You might then get (and give) help on the <a href='%3'>Support Forums</a>."
-				"</p>"
-				"<h3>Contribute to the project</h3>"
-				"<p>"
-				"You can help the LAN Messenger project giving some of your time to help the community, to translate the application or documentation, and to test the program. And of course, you can <b>promote</b> LAN Messenger."
-				"</p>"
 			"</body>"
 		"</html>");
-	ui.txtHelp->setHtml(html.arg(helpLink, faqLink, supportLink));
+	ui.txtHelp->setHtml(html);
 }

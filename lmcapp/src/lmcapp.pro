@@ -53,7 +53,8 @@ unix:!symbian {
 
 win32: {
     CONFIG -= debug_and_release debug_and_release_target
-    CONFIG += skip_target_version_ext
+    CONFIG += staticlib skip_target_version_ext
+    DESTDIR = ../lib
 }
 unix:!symbian {
     CONFIG(debug, debug|release) {

@@ -19,6 +19,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
 **
+** Modified by ASHAI, 2026.
+**
 ****************************************************************************/
 
 
@@ -153,29 +155,21 @@ void lmcMainWindow::stop(void) {
 
 	pTrayIcon->hide();
 
-	//	delete all temp files from cache
+	//	Messages are written to the history database as they arrive. Cached
+	//	conversation files are kept so that the conversation can be restored in
+	//	the chat window on the next launch; other temp files are deleted.
 	QDir cacheDir(StdLocation::cacheDir());
 	if(!cacheDir.exists())
 		return;
     QDir::Filters filters = QDir::Files | QDir::Readable;
     QDir::SortFlags sort = QDir::Name;
-    //  save all cached conversations to history, then delete the files
-    QString filter = "msg_*.tmp";
-    lmcMessageLog* pMessageLog = new lmcMessageLog();
+
+    //	delete temp files from cache, except cached conversations (msg_*.tmp)
+    QString filter = "*.tmp";
     QStringList fileNames = cacheDir.entryList(QStringList() << filter, filters, sort);
     foreach (QString fileName, fileNames) {
-        QString filePath = cacheDir.absoluteFilePath(fileName);
-        pMessageLog->restoreMessageLog(filePath, false);
-        QString szMessageLog = pMessageLog->prepareMessageLogForSave();
-        History::save(pMessageLog->peerName, QDateTime::currentDateTime(), &szMessageLog);
-        QFile::remove(filePath);
-    }
-    pMessageLog->deleteLater();
-
-    //  delete all other temp files
-    filter = "*.tmp";
-    fileNames = cacheDir.entryList(QStringList() << filter, filters, sort);
-    foreach (QString fileName, fileNames) {
+        if(fileName.startsWith("msg_"))
+            continue;
         QString filePath = cacheDir.absoluteFilePath(fileName);
         QFile::remove(filePath);
     }
@@ -472,15 +466,6 @@ void lmcMainWindow::helpAction_triggered(void) {
 	emit showHelp(&rect);
 }
 
-void lmcMainWindow::homePageAction_triggered(void) {
-	QDesktopServices::openUrl(QUrl(IDA_DOMAIN));
-}
-
-void lmcMainWindow::updateAction_triggered(void) {
-	QRect rect = geometry();
-	emit showUpdate(&rect);
-}
-
 void lmcMainWindow::trayIcon_activated(QSystemTrayIcon::ActivationReason reason) {
 	switch(reason) {
 	case QSystemTrayIcon::Trigger:
@@ -702,10 +687,6 @@ void lmcMainWindow::createMainMenu(void) {
 	helpAction = pHelpMenu->addAction(QIcon(QPixmap(IDR_QUESTION, "PNG")), "&Help",
 		this, SLOT(helpAction_triggered()), QKeySequence::HelpContents);
 	pHelpMenu->addSeparator();
-	QString text = "%1 &online";
-	onlineAction = pHelpMenu->addAction(QIcon(QPixmap(IDR_WEB, "PNG")), text.arg(lmcStrings::appName()), 
-		this, SLOT(homePageAction_triggered()));
-	updateAction = pHelpMenu->addAction("Check for &Updates", this, SLOT(updateAction_triggered()));
 	aboutAction = pHelpMenu->addAction(QIcon(QPixmap(IDR_INFO, "PNG")), "&About", this, SLOT(trayAboutAction_triggered()));
 
 	layout()->setMenuBar(pMainMenu);
@@ -851,11 +832,8 @@ void lmcMainWindow::setUIText(void) {
 	settingsAction->setText(tr("&Preferences"));
 	pHelpMenu->setTitle(tr("&Help"));
 	helpAction->setText(tr("&Help"));
-	QString text = tr("%1 &online");
-	onlineAction->setText(text.arg(lmcStrings::appName()));
-	updateAction->setText(tr("Check for &Updates..."));
 	aboutAction->setText(tr("&About"));
-	text = tr("&Show %1");
+	QString text = tr("&Show %1");
 	trayShowAction->setText(text.arg(lmcStrings::appName()));
 	trayStatusAction->setText(tr("&Change Status"));
 	trayHistoryAction->setText(tr("&History"));

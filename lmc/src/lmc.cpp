@@ -24,6 +24,8 @@
 
 #include <QMessageBox>
 #include <QTranslator>
+#include <QDir>
+#include <QFile>
 #include "trace.h"
 #include "lmc.h"
 
@@ -48,6 +50,7 @@ lmcCore::lmcCore(void) {
 	connect(pMainWindow, SIGNAL(showPublicChat()), this, SLOT(showPublicChat()));
 	connect(pMainWindow, SIGNAL(groupUpdated(GroupOp, QVariant, QVariant)),
 			this, SLOT(updateGroup(GroupOp, QVariant, QVariant)));
+	connect(HistoryStore::instance(), SIGNAL(cleared(QString)), this, SLOT(historyCleared(QString)));
 	pPublicChatWindow = new lmcChatRoomWindow();
 	connect(pPublicChatWindow, SIGNAL(messageSent(MessageType, QString*, XmlMessage*)),
 		this, SLOT(sendMessage(MessageType, QString*, XmlMessage*)));
@@ -103,6 +106,12 @@ void lmcCore::init(const QString& szCommandArgs) {
 	loadSettings();
 
 	lmcTrace::write("Settings loaded");
+
+	QString historyError;
+	if(!HistoryStore::instance()->open(&historyError))
+		lmcTrace::write("History database error: " + historyError);
+	else
+		lmcTrace::write("History database opened");
 
 	pMessaging->init(pInitParams);
 	pMainWindow->init(pMessaging->localUser, &pMessaging->groupList, pMessaging->isConnected());
@@ -248,6 +257,8 @@ void lmcCore::stop(void) {
 	pMessaging->stop();
 	pMainWindow->stop();
 
+	HistoryStore::instance()->close();
+
 	lmcTrace::write("Application stopped");
 }
 
@@ -354,7 +365,7 @@ bool lmcCore::receiveAppMessage(const QString& szMessage) {
 			pMessaging->setLoopback(true);
 	}
 	if(messageList.contains("/nohistory", Qt::CaseInsensitive)) {
-		QFile::remove(History::historyFile());
+		HistoryStore::instance()->clearAll();
 		if(pHistoryWindow)
 			pHistoryWindow->updateList();
 	}
@@ -412,9 +423,15 @@ void lmcCore::showTransfers(void) {
 }
 
 void lmcCore::showHistory(void) {
+	showHistory(NULL, NULL);
+}
+
+void lmcCore::showHistory(QString* lpszUserId, QString* lpszUserName) {
 	if(!pHistoryWindow) {
 		pHistoryWindow = new lmcHistoryWindow();
-		pHistoryWindow->init();
+		pHistoryWindow->init(lpszUserId, lpszUserName);
+	} else {
+		pHistoryWindow->setFilter(lpszUserId, lpszUserName);
 	}
 	
 	//	if window is minimized it, restore it to previous state
@@ -429,7 +446,6 @@ void lmcCore::showHistory(void) {
 void lmcCore::showSettings(void) {
 	if(!pSettingsDialog) {
 		pSettingsDialog = new lmcSettingsDialog(pMainWindow);
-		connect(pSettingsDialog, SIGNAL(historyCleared()), this, SLOT(historyCleared()));
 		connect(pSettingsDialog, SIGNAL(fileHistoryCleared()), this, SLOT(fileHistoryCleared()));
 		pSettingsDialog->init();
 	}
@@ -500,9 +516,26 @@ void lmcCore::showPublicChat() {
 	showPublicChatWindow(true);
 }
 
-void lmcCore::historyCleared(void) {
+void lmcCore::historyCleared(const QString& peerId) {
 	if(pHistoryWindow)
 		pHistoryWindow->updateList();
+
+	for(int index = 0; index < chatWindows.count(); index++)
+		chatWindows[index]->historyCleared(peerId);
+
+	for(int index = 0; index < chatRoomWindows.count(); index++)
+		chatRoomWindows[index]->historyCleared(peerId);
+
+	//	Drop cached conversations so that closed chat windows do not restore
+	//	history that has just been cleared.
+	QDir cacheDir(StdLocation::cacheDir());
+	if(peerId.isEmpty()) {
+		QStringList files = cacheDir.entryList(QStringList() << "msg_*.tmp", QDir::Files);
+		foreach(QString fileName, files)
+			QFile::remove(cacheDir.absoluteFilePath(fileName));
+	} else {
+		QFile::remove(cacheDir.absoluteFilePath("msg_" + peerId + ".tmp"));
+	}
 }
 
 void lmcCore::fileHistoryCleared(void) {
@@ -846,7 +879,7 @@ void lmcCore::createChatWindow(QString* lpszUserId) {
 	User* pRemoteUser = pMessaging->getUser(lpszUserId);
 	connect(pChatWindow, SIGNAL(messageSent(MessageType, QString*, XmlMessage*)), 
 		this, SLOT(sendMessage(MessageType, QString*, XmlMessage*)));
-	connect(pChatWindow, SIGNAL(showHistory()), this, SLOT(showHistory()));
+	connect(pChatWindow, SIGNAL(showHistory(QString*, QString*)), this, SLOT(showHistory(QString*, QString*)));
 	connect(pChatWindow, SIGNAL(showTransfers()), this, SLOT(showTransfers()));
 	connect(pChatWindow, SIGNAL(closed(QString*)), this, SLOT(chatWindow_closed(QString*)));
 	pChatWindow->init(pLocalUser, pRemoteUser, pMessaging->isConnected());

@@ -1,6 +1,7 @@
 ; LAN Messenger Installation Script
 ; Version: 2.2
 ; Copyright (C) 2010-2011 Dilip Radhakrishnan
+; Modified by ASHAI, 2026.
 ; Version History
 ; 1.0
 ;   -Initial release version
@@ -34,9 +35,8 @@ SetCompressor /SOLID lzma
   
   !define ProductName "LAN Messenger"
   !define CompanyName "LAN Messenger"
-  !define ProductVersion "1.2.39"
-  !define InstallerVersion "1.2.3.9"
-  !define ProductUrl "http://lanmessenger.github.io"
+!define ProductVersion "1.3.0"
+!define InstallerVersion "1.3.0.0"
   !define CompanyRegKey "SOFTWARE\${CompanyName}"
   !define AppRegKey "${CompanyRegKey}\${ProductName}"
   !define UninstKey "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\${ProductName}"
@@ -54,7 +54,7 @@ SetCompressor /SOLID lzma
   ;Name and file
   Name "${ProductName}"
   BrandingText $BrandText
-  OutFile "lmc-${ProductVersion}-win32.exe"
+  OutFile "lmc-${ProductVersion}-ASHAI-win32.exe"
 
   ;Default installation folder
   InstallDir "$PROGRAMFILES\${ProductName}"
@@ -87,6 +87,7 @@ SetCompressor /SOLID lzma
 ;Pages
 
   !define MUI_WELCOMEPAGE_TITLE_3LINES
+  !define MUI_WELCOMEPAGE_TEXT "This is an unofficial fork of LAN Messenger, not affiliated with or endorsed by Qualia Digital Solutions.$\r$\n$\r$\nSource code: https://github.com/ashai-logic/lanmessenger$\r$\n$\r$\nClick Next to continue."
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE "package\eula\license.txt"
   !insertmacro MUI_PAGE_DIRECTORY
@@ -120,9 +121,10 @@ SetCompressor /SOLID lzma
   VIProductVersion "${InstallerVersion}"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${ProductName}"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${CompanyName}"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright (c) 2010-2011 Dilip Radhakrishnan."
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright (C) 2010-2011 Dilip Radhakrishnan. Copyright (C) 2010-2012 Qualia Digital Solutions. Copyright (C) 2026 ASHAI."
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${ProductName} Installer"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${ProductVersion}"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${ProductVersion}"
 
 
 ;------------------------------------------------------------------------------
@@ -148,9 +150,15 @@ Section
   
   ;Copy application files to the installation directory  
   File "..\..\${ExeFolder}\${AppExec}"
-  File "..\..\${ExeFolder}\libeay32.dll"
-  File "..\..\${ExeFolder}\ssleay32.dll"
+  File "..\..\${ExeFolder}\libcrypto-4.dll"
+  File "..\..\${ExeFolder}\libssl-4.dll"
+  File "..\..\${ExeFolder}\lmc-ashai.asc"
+  File "..\..\${ExeFolder}\lmc.exe.sig"
   File "..\..\src\resources\text\license.txt"
+  File "..\..\src\resources\text\license-openssl.txt"
+  File "..\..\src\resources\text\notice-openssl.txt"
+  File "..\..\src\resources\text\readme.txt"
+  File "..\..\..\README_RU.md"
   CreateDirectory "$INSTDIR\sounds"
   SetOutPath "$INSTDIR\sounds"
   File /r "..\..\${ExeFolder}\sounds\*.*"
@@ -198,13 +206,13 @@ Section
   WriteRegStr HKLM "${UninstKey}" "DisplayIcon" "$INSTDIR\${AppExec},0"
   WriteRegStr HKLM "${UninstKey}" "DisplayVersion" "${ProductVersion}"
   WriteRegStr HKLM "${UninstKey}" "Publisher" "${CompanyName}"
-  WriteRegStr HKLM "${UninstKey}" "URLInfoAbout" "${ProductUrl}"
-  WriteRegStr HKLM "${UninstKey}" "URLUpdateInfo" "${ProductUrl}"
+  WriteRegStr HKLM "${UninstKey}" "URLInfoAbout" "https://github.com/ashai-logic/lanmessenger"
+  WriteRegStr HKLM "${UninstKey}" "Contact" "ashai.logic@gmail.com"
   WriteRegDWORD HKLM "${UninstKey}" "NoModify" 1
   WriteRegDWORD HKLM "${UninstKey}" "NoRepair" 1  
   
   DetailPrint "Adding Windows Firewall Exception '${ProductName}'"
-  nsisFirewall::AddAuthorizedApplication "$INSTDIR\${AppExec}" "${ProductName}"
+  nsExec::ExecToLog 'netsh advfirewall firewall add rule name="${ProductName}" dir=in action=allow program="$INSTDIR\${AppExec}" enable=yes'
   Pop $0
 
   ;Create Start menu shortcuts (for all users)
@@ -237,7 +245,7 @@ Section "Uninstall"
   SetShellVarContext current
   
   DetailPrint "Removing Windows Firewall Exception '${ProductName}'"
-  nsisFirewall::RemoveAuthorizedApplication "$INSTDIR\${AppExec}"
+  nsExec::ExecToLog 'netsh advfirewall firewall delete rule name="${ProductName}"'
   Pop $0
   
   ;Remove registry keys
@@ -263,8 +271,15 @@ Section "Uninstall"
   
   ;Delete application files and folder
   Delete "$INSTDIR\${AppExec}"
-  Delete "$INSTDIR\libeay32.dll"
+  Delete "$INSTDIR\libcrypto-4.dll"
+  Delete "$INSTDIR\libssl-4.dll"
+  Delete "$INSTDIR\lmc-ashai.asc"
+  Delete "$INSTDIR\lmc.exe.sig"
   Delete "$INSTDIR\license.txt"
+  Delete "$INSTDIR\license-openssl.txt"
+  Delete "$INSTDIR\notice-openssl.txt"
+  Delete "$INSTDIR\readme.txt"
+  Delete "$INSTDIR\README_RU.md"
   RMDir /r "$INSTDIR\sounds"
   RMDir /r "$INSTDIR\lang"
   ;RMDir /r "$INSTDIR\themes"

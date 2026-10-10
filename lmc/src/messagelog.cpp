@@ -19,6 +19,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
 **
+** Modified by ASHAI, 2026.
+**
 ****************************************************************************/
 
 
@@ -26,6 +28,7 @@
 #include <QAction>
 #include <QScrollBar>
 #include <QTextBlock>
+#include <QFileInfo>
 #include "messagelog.h"
 
 const QString acceptOp("accept");
@@ -44,6 +47,7 @@ lmcMessageLog::lmcMessageLog(QWidget *parent) : QMessageBrowser (parent) {
 
 	participantAvatars.clear();
 	hasData = false;
+	savedCount = 0;
 	messageTime = false;
 	messageDate = false;
 	allowLinks = false;
@@ -87,11 +91,11 @@ void lmcMessageLog::createContextMenu(void) {
 	setContextMenuPolicy(Qt::CustomContextMenu);
 }
 
-void lmcMessageLog::appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage,
+int lmcMessageLog::appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage,
 		bool bReload) {
 
 	if(!pMessage && type != MT_Error)
-		return;
+		return -1;
 
 	QString message;
 	QString html;
@@ -188,12 +192,25 @@ void lmcMessageLog::appendMessageLog(MessageType type, QString* lpszUserId, QStr
 		break;
 	}
 
+	int historyIndex = -1;
 	if(!bReload && addToLog && pMessage) {
 		XmlMessage xmlMessage = pMessage->clone();
 		QString userId = lpszUserId ? *lpszUserId : QString::null;
 		QString userName = lpszUserName ? *lpszUserName : QString::null;
+		//	File and folder transfers travel without a timestamp, so stamp them
+		//	now. The timestamp is used to order and to identify the history entry.
+		if((type == MT_File || type == MT_Folder) && xmlMessage.header(XN_TIME).isEmpty())
+			xmlMessage.addHeader(XN_TIME, QString::number(QDateTime::currentMSecsSinceEpoch()));
 		messageLog.append(SingleMessage(type, userId, userName, xmlMessage, id));
+		//	Chat messages and file/folder transfers are stored in the history
+		//	database. Other log entries (delivery failures, join/leave notices,
+		//	chat state) are displayed but must never be persisted.
+		if(type == MT_Message || type == MT_GroupMessage || type == MT_File || type == MT_Folder)
+			historyIndex = messageLog.count() - 1;
+		if(type == MT_File || type == MT_Folder)
+			hasData = true;
     }
+	return historyIndex;
 }
 
 void lmcMessageLog::updateFileMessage(FileMode mode, FileOp op, QString fileId)
@@ -242,36 +259,117 @@ void lmcMessageLog::reloadMessageLog(void) {
 	}
 }
 
-QString lmcMessageLog::prepareMessageLogForSave(OutputFormat format) {
+QString lmcMessageLog::historyDocumentHeader(void) {
+	return
+		"<html><head><style type='text/css'>"\
+		"*{font-size: 9pt;} body {-webkit-nbsp-mode: space; word-wrap: break-word;}"\
+		"span.salutation {font-weight: bold;} p {border-bottom: 1px solid #CCC;}"\
+		"</style></head><body>";
+}
+
+QString lmcMessageLog::historyDocumentFooter(void) {
+	return "</body></html>";
+}
+
+QString lmcMessageLog::historyHtmlAt(int index) {
+	if(index < 0 || index >= messageLog.count())
+		return QString::null;
+
+	SingleMessage msg = messageLog.at(index);
+	if(msg.type == MT_File || msg.type == MT_Folder)
+		return historyFileHtmlAt(index);
+	if(msg.type != MT_Message && msg.type != MT_GroupMessage)
+		return QString::null;
+
+	QDateTime time;
+	time.setMSecsSinceEpoch(msg.message.header(XN_TIME).toLongLong());
+	QString messageText = msg.message.data(XN_MESSAGE);
+	decodeMessage(&messageText, true);
+
+	return "<p><span class='salutation'>" + msg.userName + " (" +
+		time.time().toString("h:mm") + " " + time.date().toString("dd.MM.yyyy") + "):</span> " +
+		"<span class='message'>" + messageText + "</span></p>";
+}
+
+//	Builds the history representation of a file or folder transfer. Unlike the
+//	live conversation this entry has no clickable Accept/Decline/Cancel links,
+//	so it stays a plain record of what was sent or received.
+QString lmcMessageLog::historyFileHtmlAt(int index) {
+	if(index < 0 || index >= messageLog.count())
+		return QString::null;
+
+	SingleMessage msg = messageLog.at(index);
+	if(msg.type != MT_File && msg.type != MT_Folder)
+		return QString::null;
+
+	QDateTime time;
+	time.setMSecsSinceEpoch(msg.message.header(XN_TIME).toLongLong());
+
+	QString fileName = msg.message.data(XN_FILENAME);
+	QFileInfo fileInfo(fileName);
+	if(!fileInfo.fileName().isEmpty())
+		fileName = fileInfo.fileName();
+
+	FileMode mode = (FileMode)Helper::indexOf(FileModeNames, FM_Max, msg.message.data(XN_MODE));
+
+	QString description;
+	if(mode == FM_Send) {
+		if(msg.type == MT_Folder)
+			description = tr("Sending folder '%1' to %2.").arg(fileName, msg.userName);
+		else
+			description = tr("Sending file '%1' to %2.").arg(fileName, msg.userName);
+	} else {
+		if(msg.type == MT_Folder)
+			description = tr("%1 is sending you a folder: %2").arg(msg.userName, fileName);
+		else
+			description = tr("%1 is sending you a file: %2").arg(msg.userName, fileName);
+	}
+
+	return "<p><span class='salutation'>(" +
+		time.time().toString("h:mm") + " " + time.date().toString("dd.MM.yyyy") + "):</span> " +
+		"<span class='message'>" + description.toHtmlEscaped() + "</span></p>";
+}
+
+QString lmcMessageLog::historySenderAt(int index) {
+	if(index < 0 || index >= messageLog.count())
+		return QString::null;
+	return messageLog.at(index).userName;
+}
+
+qint64 lmcMessageLog::historyTimeAt(int index) {
+	if(index < 0 || index >= messageLog.count())
+		return 0;
+	SingleMessage msg = messageLog.at(index);
+	return msg.message.header(XN_TIME).toLongLong();
+}
+
+void lmcMessageLog::clearMessages(void) {
+	messageLog.clear();
+	hasData = false;
+	lastId = QString::null;
+	reloadMessageLog();
+}
+
+QString lmcMessageLog::prepareMessageLogForSave(OutputFormat format, int fromIndex) {
 	QDateTime time;
 
-	if(format == HtmlFormat) {
-		QString html =
-			"<html><head><style type='text/css'>"\
-			"*{font-size: 9pt;} body {-webkit-nbsp-mode: space; word-wrap: break-word;}"\
-			"span.salutation {float:left; font-weight: bold;} span.time {float: right;}"\
-			"span.message {clear: both; display: block;} p {border-bottom: 1px solid #CCC;}"\
-			"</style></head><body>";
+	if(fromIndex < 0)
+		fromIndex = 0;
 
-		for(int index = 0; index < messageLog.count(); index++) {
-			SingleMessage msg = messageLog.at(index);
-			if(msg.type == MT_Message || msg.type == MT_GroupMessage) {
-				time.setMSecsSinceEpoch(msg.message.header(XN_TIME).toLongLong());
-				QString messageText = msg.message.data(XN_MESSAGE);
-				decodeMessage(&messageText, true);
-				QString htmlMsg =
-					"<p><span class='salutation'>" + msg.userName + ":</span>"\
-					"<span class='time'>" + time.time().toString(Qt::SystemLocaleShortDate) + "</span>"\
-					"<span class='message'>" + messageText + "</span></p>";
+	if(format == HtmlFormat) {
+		QString html = historyDocumentHeader();
+
+		for(int index = fromIndex; index < messageLog.count(); index++) {
+			QString htmlMsg = historyHtmlAt(index);
+			if(!htmlMsg.isNull())
 				html.append(htmlMsg);
-			}
 		}
 
-		html.append("</body></html>");
+		html.append(historyDocumentFooter());
 		return html;
 	} else {
 		QString text;
-		for(int index = 0; index < messageLog.count(); index++) {
+		for(int index = fromIndex; index < messageLog.count(); index++) {
 			SingleMessage msg = messageLog.at(index);
 			if(msg.type == MT_Message || msg.type == MT_GroupMessage) {
 				time.setMSecsSinceEpoch(msg.message.header(XN_TIME).toLongLong());
@@ -288,6 +386,18 @@ QString lmcMessageLog::prepareMessageLogForSave(OutputFormat format) {
 
 void lmcMessageLog::setAutoScroll(bool enable) {
 	autoScroll = enable;
+}
+
+int lmcMessageLog::messageCount(void) const {
+	return messageLog.count();
+}
+
+int lmcMessageLog::getSavedCount(void) const {
+	return savedCount;
+}
+
+void lmcMessageLog::setSavedCount(int value) {
+	savedCount = value;
 }
 
 void lmcMessageLog::abortPendingFileOperations(void) {
@@ -328,7 +438,7 @@ void lmcMessageLog::saveMessageLog(QString filePath) {
         return;
 
     QDataStream stream(&file);
-    stream << peerId << peerName << messageLog;
+    stream << peerId << peerName << messageLog << savedCount;
 
     file.close();
 }
@@ -342,6 +452,9 @@ void lmcMessageLog::restoreMessageLog(QString filePath, bool reload) {
 
     QDataStream stream(&file);
     stream >> peerId >> peerName >> messageLog;
+    savedCount = messageLog.count();
+    if(stream.status() == QDataStream::Ok)
+        stream >> savedCount;
 
     file.close();
 

@@ -44,17 +44,31 @@ public:
 
 	void initMessageLog(QString themePath, bool clearLog = true);
     void reloadTheme();
-	void appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage,
+	//	Appends a message to the log and returns the index of the appended entry
+	//	in the internal message list, or -1 when nothing was appended to it
+	//	(e.g. for non-history events such as chat state).
+	int appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage,
 		bool bReload = false);
 	void updateFileMessage(FileMode mode, FileOp op, QString fileId);
 	void updateUserName(QString* lpszUserId, QString* lpszUserName);
 	void updateAvatar(QString* lpszUserId, QString* lpszFilePath);
 	void reloadMessageLog(void);
-	QString prepareMessageLogForSave(OutputFormat format = HtmlFormat);
+	QString prepareMessageLogForSave(OutputFormat format = HtmlFormat, int fromIndex = 0);
 	void setAutoScroll(bool enable);
     void abortPendingFileOperations(void);
     void saveMessageLog(QString filePath);
     void restoreMessageLog(QString filePath, bool reload = true);
+    int messageCount(void) const;
+    int getSavedCount(void) const;
+    void setSavedCount(int value);
+
+    //	Helpers used to persist individual chat messages to the history store
+    QString historyHtmlAt(int index);
+    QString historySenderAt(int index);
+    qint64 historyTimeAt(int index);
+    static QString historyDocumentHeader(void);
+    static QString historyDocumentFooter(void);
+    void clearMessages(void);
 
 	QString localId;
 	QString peerId;
@@ -62,6 +76,7 @@ public:
 	QHash<QString, QString> participantAvatars;
 	QString lastId;
 	bool hasData;
+	int savedCount;
 	int fontSizeVal;
 	bool showSmiley;
 	bool autoFile;
@@ -115,6 +130,7 @@ private:
 	void setUIText(void);
     QString getFileTempId(FileMode mode, QString fileId) const;
     QString getFileTempId(XmlMessage* pMessage) const;
+    QString historyFileHtmlAt(int index);
 
 	QMap<QString, XmlMessage> sendFileMap;
 	QMap<QString, XmlMessage> receiveFileMap;

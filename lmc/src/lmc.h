@@ -70,13 +70,14 @@ private slots:
 	void connectionStateChanged(void);
 	void showTransfers(void);
 	void showHistory(void);
+	void showHistory(QString* lpszUserId, QString* lpszUserName);
 	void showSettings(void);
 	void showHelp(QRect* pRect);
 	void showUpdate(QRect* pRect);
 	void showAbout(void);
 	void showBroadcast(void);
 	void showPublicChat();
-	void historyCleared(void);
+	void historyCleared(const QString& peerId);
 	void fileHistoryCleared(void);
 	void showTrayMessage(TrayMessageType type, QString szMessage, QString szTitle = QString::null, TrayMessageIcon icon = TMI_Info);
 	void updateGroup(GroupOp op, QVariant value1, QVariant value2);

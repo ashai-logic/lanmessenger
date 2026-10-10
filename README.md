@@ -1,195 +1,151 @@
-How to compile LAN Messenger
-============================
+LAN Messenger (ASHAI fork)
+==========================
 
-You need Qt (http://qt.nokia.com/) to compile.
-I built LAN Messenger using Qt 4.8, so you probably need that or a 
-later version.
+LAN Messenger is a free peer-to-peer messaging application for intra-network
+communication that does not require a server. This is an unofficial fork based
+on LAN Messenger 1.2.39 of 18 December 2018.
 
-You also need OpenSSL (http://www.openssl.org/)
-I used version 1.0.0.e, so you know what to get.
-Please read the OpenSSL section for more information.
+Project repository: https://github.com/ashai-logic/lanmessenger
 
-The application consists of two projects - lmc and lmcapp. lmcapp is 
-just an extension of the qtsingleapplication project released by the 
-Qt people. I have added a few functions to support multilanguage UI.
-
-The main project is lmc which contains the entire application. I have
-included the project files for both projects.
-
-Extract both folders. Make sure the directory hierarchy is maintained.
-"lmc" and "lmcapp" should be folders at same level. Make sure the 
-dependency paths of lmc are set to the correct locations. It depends 
-on lmcapp and openssl, in addition to the standard Qt libraries.
-
-The code is identical for all platforms, but there are a few differences
-in the way application is built and run on each platform. Please read
-the platform specific notes to know more.
-
-Note: I used Qt Creator IDE with gcc compiler on all platforms. If you 
-are using any other IDE and/or compiler and run into any issue, I can 
-only provide generic help.
-
-Important: Its better if your project paths do not contain any white spaces.
-Some tools do not work properly with paths containing spaces. Use paths that
-do not have spaces to avoid headaches down the lane.
-Saving project files to your dektop is a BAD idea.
+The application is distributed under the GNU General Public License v3.
+It includes OpenSSL, distributed under the Apache License 2.0.
+The application uses Qt 5.12.12 (statically linked) under the GPLv3 license.
 
 
-Compiling/Installing OpenSSL
-============================
-If precompiled binary distribution of OpenSSL is available for your
-platform, you can use it instead of building from source.
+Supported build environment
+===========================
+The reference (and supported) build environment is Windows 32-bit:
 
-The steps for compiling OpenSSL varies depending on your platform.
-The package that you get from OpenSSL website gives detailed instructions
-on how to compile on all supported platforms. OpenSSL itself may need
-additional software packages to compile depending on your system.
+  - Qt 5.12.12, built statically with MinGW 7.3.0 32-bit, installed in
+    C:\Qt-static\5.12.12\mingw73_32 (see "Building static Qt" below).
+  - MinGW 7.3.0 32-bit (C:\Qt\Qt5.12.12\Tools\mingw730_32).
+  - Strawberry Perl 5.22.1.3 32-bit (C:\Strawberry) - needed to build static Qt.
+  - NSIS 3.12 (C:\Program Files (x86)\NSIS) - needed to build the installer.
+  - OpenSSL 4.0.1 (Win32). Only the required files (headers, MinGW import
+    libraries, runtime DLLs and the license) are vendored in
+    lmc\src\third_party\openssl, so a separate OpenSSL installation is NOT
+    required to build LAN Messenger.
 
-Make sure that OpenSSL is built as a shared library.
+The source tree has the following top level layout. "lmc" and "lmcapp" must
+stay at the same level.
 
-Windows
--------
-Get the precompiled binary distribution of OpenSSL from
-http://www.slproweb.com/products/Win32OpenSSL.html
-
-This version of LAN Messenger was built with the package named
-"Win32 OpenSSL v1.0.0e". Download the package and install to a folder
-called "openssl" which should be at the same level as the folder "lmc". 
-While installing, make sure that the option to copy DLLs to the OpenSSL
-binaries directory is selected in the Additional Tasks page.
-
-Linux/X11
----------
-Many Linux distributions come with pre-compiled OpenSSL packages. If your
-system has one, you may be able to link the project to it. If your system
-lacks the package, or if you are unable to link with it, you need to build
-OpenSSL from source.
-
-Specify the "shared" switch to ensure that OpenSSL is built as a shared
-library.
-
-Mac OS X
---------
-Mac OS X ships with a binary package of OpenSSL, so there is not need to
-compile. You can link the project with this package even if it is an older 
-version than the one found on OpenSSl web site.
+  lanmessenger
+   |- lmc
+   |   |- build      (shadow build directory for the lmc project)
+   |   |- release    (build output: lmc.exe, lmc.rcc, lang, sounds, themes)
+   |   |- setup      (installer/packaging scripts; win32, x11, mac)
+   |   \- src
+   |        |- third_party\openssl   (vendored OpenSSL headers/libs/license)
+   |        \- scripts               (buildwin32.bat, ...)
+   |- lmcapp
+   |- build_static_qt.bat
+   |- build_windows.bat
+   |- History_en.txt
+   \- History_ru.txt
 
 
-Compiling LAN Messenger
-=======================
-Some custom scripts are used for automating part of the compilation and setup
-of LAN Messenger. These scripts rely on an environment variable called
-QTDIR that should contain the path where Qt libraries are installed. More
-specifically, it should point to the parent folder of the bin and lib folders
-where Qt binaries reside. Eg: C:\Qt\4.8.0 on Windows.
+Building static Qt
+==================
+Static Qt is used so that the portable archive contains no Qt DLLs.
+Run build_static_qt.bat (run it from a normal command prompt, it does not need
+elevation) and wait for "Build completed". The script configures and builds
+qtbase only (-no-openssl -opengl desktop -static -release) and installs it to
+C:\Qt-static\5.12.12\mingw73_32. Adjust the paths at the top of the script if
+your Qt sources, MinGW or Perl are installed elsewhere.
 
-Refer PLATFORM_SPECIFIC.TXT for additional details about setting up the build
-environment on respective platforms.
-
-
-Compiling LAN Messenger on Windows
-==================================
-Its possible to compile using other build chains/IDEs, but its better 
-to stick to Qt Creator and gcc tool chain.
-
-OpenSSL should be built/installed first. I recommend using a folder at 
-the same level as "lmc" folder as the OpenSSL folder.
-
-Next build "lmcapp" project. All the files needed are present inside
-lmcapp\src folder. This project should be built as a shared library.
-The outputs of this project are lmcapp.dll and lmcapp.a, which will be
-created in lmcapp\lib folder. The .dll file should be moved to 
-lmcapp\bin and the .a file should be left in lmcapp\lib. In case of 
-debug build, the output files will be lmcappd.dll and lmcappd.a
-
-Finally build "lmc" project. This project references both OpenSSL and
-lmcapp, so the correct paths to headers and libraries should be set
-first.
-The headers of lmcapp should be in lmcapp\include
-The libraries of lmcapp should be in lmcapp\lib
-The headers of OpenSSL should be in openssl\include
-The libraries of OpenSSL should be in openssl\lib
-Note: OpenSSL paths may be different depending on how it was built/installed
-in your system.
-
-Once you have built lmc, run the "buildwin32.bat" batch file found in
-the src\scripts folder. This script compiles the translation files, builds 
-the resources into a separate binary file and copies the application 
-dependencies to the output folder. The path of output directory should 
-be passed as a parameter for this script. The script depends on the QTDIR 
-environment variable, so make sure it is set correctly. You can probably 
-add the execution of this script as a custom build step in your IDE. That 
-way it will be automatically called every time you build the project.
+Qt is built and used under the GNU General Public License v3 (GPLv3). Qt source
+code:
+https://download.qt.io/archive/qt/5.12/5.12.12/single/qt-everywhere-src-5.12.12.tar.xz
 
 
-Compiling LAN Messenger on X11/Linux
-====================================
-OpenSSL should be built first. I recommend using a folder at the same
-level as "lmc" folder as the OpenSSL folder.
+Building OpenSSL
+================
+The required OpenSSL files are already vendored in
+lmc\src\third_party\openssl. If you need to refresh them, install the 32-bit
+"Win32 OpenSSL" package (https://slproweb.com/products/Win32OpenSSL.html) and
+copy only:
 
-Next build "lmcapp" project. All the files needed are present inside
-lmcapp/src folder. This project should be built as a shared library.
-The outputs of this project is liblmcapp.1.0.0.so, which will be
-created in lmcapp/lib folder.
-
-Finally build "lmc" project. This project references both OpenSSL and
-lmcapp, so the correct paths to headers and libraries should be set
-first.
-The headers of lmcapp should be in lmcapp/include
-The libraries of lmcapp should be in lmcapp/lib
-The headers of OpenSSL should be in openssl/include
-The libraries of OpenSSL should be in openssl/lib
-Note: OpenSSL paths may be different depending on how it was built/installed
-in your system.
-
-Once you have built lmc, run the "buildx11" shell script found in the
-src/scripts folder. This script performs the same actions as its Windows 
-counterpart. The QTDIR variable defined in the script should contain the 
-correct path to Qt libraries. You can add the execution of this script as 
-a custom build step to automate the whole process. If you get an error 
-while executing the script, edit the script to make sure that the Qt 
-plugins path in the script is correct.
+  include\openssl\*         -> lmc\src\third_party\openssl\include\openssl\
+  lib\MinGW\x86\*.dll.a     -> lmc\src\third_party\openssl\lib\MinGW\x86\
+  bin\libcrypto-4.dll       -> lmc\src\third_party\openssl\bin\
+  bin\libssl-4.dll          -> lmc\src\third_party\openssl\bin\
+  license.txt               -> lmc\src\third_party\openssl\license.txt
 
 
-Compiling LAN Messenger on Mac OS X
-===================================
-Build "lmcapp" project. All the files needed are present inside
-lmcapp/src folder. This project should be built as a shared library.
-The outputs of this project is liblmcapp.1.0.0.dylib, which will be
-created in lmcapp/lib folder.
-
-Finally build "lmc" project. This project references lmcapp, so the 
-correct paths to headers and libraries should be set first.
-The headers of lmcapp should be in lmcapp/include
-The libraries of lmcapp should be in lmcapp/lib
-
-Note: There is no need to link to OpenSSL since it is present as a system
-library on Mac OS X.
-
-Once you have built lmc, run the "buildmacos" shell script found in the
-src/scripts folder. This script performs the same actions as its Windows 
-counterpart. The script depends on the QTDIR environment variable, so make 
-sure it is set correctly. You can add the execution of this script as a 
-custom build step to automate the whole process. If you get an error while 
-executing the script, edit  the script to make sure that the Qt plugins 
-path in the script is correct.
-
-Note: On Mac OS X, option to start LAN Messenger on startup will not work.
-This is a platform dependent function and I have not implemented it.
-
-
-Audio playback support
+Building LAN Messenger
 ======================
-LAN Messenger can play sounds to accompany certain events. This behaviour
-is customizable in the Preferences dialog. Sound functions are provided
-by Qt which in turn depend on different subsystem on each platform. This
-should not be a problem in Windows and Mac. However on Linux, Qt needs the
-Network Audio System for sound functions. If NAS is not available the
-application will not play sounds. Sound options will be grayed out in the
-Preferences dialog.
+Set QTDIR to the static Qt prefix, e.g.:
+
+  set QTDIR=C:\Qt-static\5.12.12\mingw73_32
+  set PATH=C:\Qt\Qt5.12.12\Tools\mingw730_32\bin;%QTDIR%\bin;%PATH%
+
+1. Build the "lmcapp" support library (static library):
+
+     cd lmcapp\src
+     qmake lmcapp.pro -spec win32-g++ CONFIG-=debug CONFIG+=release
+     mingw32-make
+     copy /Y ..\lib\liblmcapp2.a ..\lib\liblmcapp.a
+
+2. Build the main "lmc" project (shadow build in lmc\build):
+
+     cd lmc\build
+     qmake ..\src\lmc.pro -spec win32-g++ CONFIG-=debug CONFIG+=release
+     mingw32-make -j4
+
+   The executable is written to lmc\release\lmc.exe.
+
+3. Run the post-build script (compiles the translations, builds lmc.rcc and
+   copies the OpenSSL DLLs). QTDIR must point to a Qt that contains lrelease
+   and rcc; the static prefix normally does not, so point QTDIR to the regular
+   Qt 5.12.12 installation when running this step:
+
+     cd lmc\src
+     set QTDIR=C:\Qt\Qt5.12.12\5.12.12\mingw73_32
+     scripts\buildwin32.bat ..\release release
+
+   Alternatively use build_windows.bat %COMPILER% which performs the steps
+   above for the mingw32 tool chain.
+
+An easier way is to use Qt Creator with the static kit, add the custom build
+step described in PLATFORM_SPECIFIC.md.
 
 
-System tray support
-===================
-On desktops that do not have a system tray, the system tray options will
-be grayed out in the Preferences dialog.
+Digital signatures
+==================
+The authorship and integrity of the released binaries is protected with a
+detached GnuPG signature (Ed25519). Next to each signed file a copy of the
+public key (lmc-ashai.asc) and a detached signature named after the full name
+of the signed file (e.g. lmc.exe.sig) are shipped:
+
+  lmc-1.3.0-ASHAI-win32.zip      + lmc-ashai.asc + lmc-1.3.0-ASHAI-win32.zip.sig
+  lmc-1.3.0-ASHAI-win32.exe      + lmc-ashai.asc + lmc-1.3.0-ASHAI-win32.exe.sig
+  lmc.exe (portable/installed)   + lmc-ashai.asc + lmc.exe.sig
+
+Verify a file externally with:
+
+  gpg --verify lmc-1.3.0-ASHAI-win32.zip.sig lmc-1.3.0-ASHAI-win32.zip
+
+The application performs the same check when the Help - About dialog is opened,
+and displays the result (OK in green, FAILED in red).
+
+
+Building the Windows packages
+=============================
+Portable archive (lmc-1.3.0-ASHAI-win32.zip):
+
+  cd lmc\setup\win32
+  zip.bat
+
+Installer (lmc-1.3.0-ASHAI-win32.exe):
+
+  cd lmc\setup\win32
+  setup.bat
+
+Both outputs are written to lmc\setup. Sign the resulting files as described
+above before publishing.
+
+
+Platform specific notes
+=======================
+See PLATFORM_SPECIFIC.md for details about the build directories, the custom
+build steps and the packaging scripts on each platform.

@@ -19,6 +19,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
 **
+** Modified by ASHAI, 2026.
+**
 ****************************************************************************/
 
 
@@ -34,13 +36,22 @@
 #define IDA_PRODUCT		"lmc"
 #define IDA_COMPANY		"lmc"
 #endif
-#define IDA_VERSION		"1.2.39"
+#define IDA_VERSION		"1.3.0"
+//	The fork brand is shown only in the About dialog.
+#define IDA_BRAND		"ASHAI"
 #define IDA_DESCRIPTION	"LAN Messenger is a free peer-to-peer messaging application for intra-network communication "\
 						"and does not require a server.\n"\
 						"LAN Messenger works on essentially every popular desktop platform."
-#define IDA_COPYRIGHT	"Copyright (C) 2010-2016 Qualia Digital Solutions."
-#define IDA_CONTACT		"lanmsngr@gmail.com"
-#define IDA_DOMAIN		"http://lanmessenger.github.io"
+#define IDA_COPYRIGHT	"Copyright (C) 2010-2011 Dilip Radhakrishnan. Copyright (C) 2010-2012 Qualia Digital Solutions. Copyright (C) 2026 ASHAI."
+#define IDA_CONTACT		"ashai.logic@gmail.com"
+#define IDA_DOMAIN		"https://github.com/ashai-logic/lanmessenger"
+
+//	Expected public key used to verify the authorship and integrity of the
+//	application. It is the raw 32-byte Ed25519 public key (hex) corresponding
+//	to the public key file "lmc-ashai.asc" that must be shipped next to lmc.exe.
+#define IDA_PUBKEY		"f668f85f300fd4d74b0993dce46eb28bc2e5b2239b3313b7d6bd93a2f49c2afa"
+#define IDA_KEYFILE		"lmc-ashai.asc"
+#define IDA_SIGFILE		"lmc.exe.sig"
 
 #if defined Q_OS_WIN
 #define IDA_PLATFORM	"Windows"

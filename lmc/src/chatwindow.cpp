@@ -64,7 +64,7 @@ lmcChatWindow::lmcChatWindow(QWidget *parent, Qt::WindowFlags flags) : QWidget(p
     peerCaps.clear();
 	threadId = QString::null;
 	groupMode = false;
-	dataSaved = false;
+	windowLoaded = false;
 
 	chatState = CS_Blank;
 	keyStroke = 0;
@@ -140,22 +140,31 @@ void lmcChatWindow::init(User* pLocalUser, User* pRemoteUser, bool connected) {
 	pMessageLog->initMessageLog(themePath);
     if(!clearOnClose)
         pMessageLog->restoreMessageLog(QDir(StdLocation::cacheDir()).absoluteFilePath("msg_" + peerId + ".tmp"));
+
+	restoreGeometry(pSettings->value(IDS_WINDOWCHAT).toByteArray());
+	ui.splitter->restoreState(pSettings->value(IDS_SPLITTERCHAT).toByteArray());
+}
+
+void lmcChatWindow::show(void) {
+	windowLoaded = true;
+	QWidget::show();
 }
 
 void lmcChatWindow::stop(void) {
-	bool saveHistory = pSettings->value(IDS_HISTORY, IDS_HISTORY_VAL).toBool();
-	if(pMessageLog->hasData && saveHistory && !dataSaved) {
-        if(clearOnClose) {
-            QString szMessageLog = pMessageLog->prepareMessageLogForSave();
-            if(!groupMode)
-                History::save(peerNames.value(peerId), QDateTime::currentDateTime(), &szMessageLog);
-            else
-                History::save(tr("Group Conversation"), QDateTime::currentDateTime(), &szMessageLog);
-            dataSaved = true;
-        } else {
-            pMessageLog->saveMessageLog(QDir(StdLocation::cacheDir()).absoluteFilePath("msg_" + peerId + ".tmp"));
-        }
+	if(windowLoaded) {
+		pSettings->setValue(IDS_WINDOWCHAT, saveGeometry());
+		pSettings->setValue(IDS_SPLITTERCHAT, ui.splitter->saveState());
 	}
+
+	//	Messages are written to the history database as they arrive, so there is
+	//	no need to save anything here. The temp file is kept only to restore the
+	//	visible conversation when the chat window is opened again.
+	bool saveHistory = pSettings->value(IDS_HISTORY, IDS_HISTORY_VAL).toBool();
+	QString cacheFile = QDir(StdLocation::cacheDir()).absoluteFilePath("msg_" + peerId + ".tmp");
+	if(!saveHistory || clearOnClose || !pMessageLog->hasData)
+		QFile::remove(cacheFile);
+	else
+		pMessageLog->saveMessageLog(cacheFile);
 }
 
 void lmcChatWindow::receiveMessage(MessageType type, QString* lpszUserId, XmlMessage* pMessage) {
@@ -379,8 +388,10 @@ void lmcChatWindow::btnFont_clicked(void) {
 	QFont font = ui.txtMessage->font();
 	font.setPointSize(ui.txtMessage->fontPointSize());
 	QFont newFont = QFontDialog::getFont(&ok, font, this, tr("Select Font"));
-	if(ok)
+	if(ok) {
 		setMessageFont(newFont);
+		pSettings->setValue(IDS_FONT, newFont.toString(), IDS_FONT_VAL);
+	}
 }
 
 void lmcChatWindow::btnFontColor_clicked(void) {
@@ -430,7 +441,45 @@ void lmcChatWindow::btnSave_clicked(void) {
 }
 
 void lmcChatWindow::btnHistory_clicked(void) {
-	emit showHistory();
+	QString userId = historyUserId();
+	QString userName = historyUserName();
+	emit showHistory(&userId, &userName);
+}
+
+QString lmcChatWindow::historyUserName(void) {
+	return groupMode ? tr("Group Conversation") : peerNames.value(peerId);
+}
+
+QString lmcChatWindow::historyUserId(void) {
+	return groupMode ? threadId : peerId;
+}
+
+void lmcChatWindow::historyCleared(const QString& id) {
+	QString ownId = historyUserId();
+	if(!id.isEmpty() && id.compare(ownId) != 0)
+		return;
+
+	pMessageLog->clearMessages();
+	QString cacheFile = QDir(StdLocation::cacheDir()).absoluteFilePath("msg_" + peerId + ".tmp");
+	QFile::remove(cacheFile);
+	if(pSaveAction)
+		pSaveAction->setEnabled(false);
+}
+
+void lmcChatWindow::persistHistoryMessage(int index) {
+	if(index < 0)
+		return;
+
+	bool saveHistory = pSettings->value(IDS_HISTORY, IDS_HISTORY_VAL).toBool();
+	if(!saveHistory || clearOnClose || !pMessageLog->hasData)
+		return;
+
+	QString html = pMessageLog->historyHtmlAt(index);
+	if(html.isNull())
+		return;
+
+	HistoryStore::instance()->append(historyUserId(), historyUserName(), groupMode,
+		pMessageLog->historySenderAt(index), pMessageLog->historyTimeAt(index), html);
 }
 
 void lmcChatWindow::btnTransfers_clicked(void) {
@@ -639,9 +688,10 @@ void lmcChatWindow::processFileOp(XmlMessage *pMessage) {
 }
 
 void lmcChatWindow::appendMessageLog(MessageType type, QString* lpszUserId, QString* lpszUserName, XmlMessage* pMessage) {
-	pMessageLog->appendMessageLog(type, lpszUserId, lpszUserName, pMessage);
+	int index = pMessageLog->appendMessageLog(type, lpszUserId, lpszUserName, pMessage);
 	if(!pSaveAction->isEnabled())
 		pSaveAction->setEnabled(pMessageLog->hasData);
+	persistHistoryMessage(index);
 }
 
 void lmcChatWindow::updateFileMessage(FileMode mode, FileOp op, QString fileId) {

@@ -1,105 +1,87 @@
-Windows
--------
-Build directory for both debug and release is lmc\build.
-lmc
- |-build
- |  |-debug
- |  |-release
- |-src
+LAN Messenger - platform specific build notes
+=============================================
 
-However, the output files are configured to be written to separate debug and 
-release folders at the same level as src.
-lmc
- |-debug
- |-release
- |-src
+Windows (supported)
+-------------------
+The reference build uses the statically linked Qt 5.12.12 / MinGW 7.3.0
+32-bit tool chain.
 
-The custom build step needs the following parameters:
-Command: scripts\buildwin32.bat
-Working directory: %{sourceDir}
-Command arguments: %{buildDir}\..\debug (for debug)
-Command arguments: %{buildDir}\..\release release (for release)
+Build directory layout (shadow build):
+  lmc
+   |-build
+   |  \- ...           (qmake generated makefiles and object files)
+   |-release           (output: lmc.exe, lmc.rcc, lang, sounds, themes)
+   \-src
 
-For building the installer, run setup.bat in lmc\setup\win32 folder. NSIS must 
-be installed first. The batch file executes an NSIS script (setup.nsi) to 
-generate the installer. The NSIS script contains two variables called 
-ProductVersion and InstallerVersion that must be set whenever the application 
-version changes. The installer generated will have the name 
-lmc-<version>-win32.exe and it will be saved to lmc\setup folder.
+OpenSSL is not installed system-wide; it is vendored in
+lmc\src\third_party\openssl and referenced directly by lmc.pro, so no extra
+configuration is required.
 
+Setting up the environment:
+  set QTDIR=C:\Qt-static\5.12.12\mingw73_32
+  set PATH=C:\Qt\Qt5.12.12\Tools\mingw730_32\bin;%QTDIR%\bin;%PATH%
 
-Linux/X11
----------
-Build directory for debug is lmc/debug.
-Build directory for release is lmc/release.
-lmc
- |-debug
- |-release
- |-src
+The custom build step needs the following parameters (Qt Creator, release kit):
+  Command: scripts\buildwin32.bat
+  Working directory: %{sourceDir}
+  Command arguments: %{buildDir}\..\release release
 
-The custom build script needs executable permission. Run the following command:
-chmod 755 ./scripts/buildx11
+Note: the static Qt prefix usually does not ship lrelease/rcc. Before running
+buildwin32.bat set QTDIR to the regular Qt installation that provides them, for
+example:
+  set QTDIR=C:\Qt\Qt5.12.12\5.12.12\mingw73_32
 
-The custom build step needs the following parameters:
-Command: ./scripts/buildx11
-Working directory: %{sourceDir}
-Command arguments: %{buildDir}
+Alternatively build everything from the command line with:
+  build_windows.bat mingw32       (lmcapp + lmc)
+  cd lmc\setup\win32
+  zip.bat                         (portable archive)
+  setup.bat                       (NSIS installer)
 
-The two script files named lan-messenger.sh and whitelist are needed to launch 
-the application. The first one sets the load paths for all libraries needed by 
-the application. The second is needed for adding the application to Ubuntu's 
-whitelist so that the system tray icon can be shown. The second script will be 
-called internally by the first script. Make sure both scripts have permission 
-to run as executables.
-chmod 755 ./lan-messenger.sh
-chmod 755 ./whitelist
+For building the installer, NSIS 3.12 must be installed (the default path is
+C:\Program Files (x86)\NSIS). setup.bat executes the NSIS script setup.nsi,
+which contains the variables ProductVersion and InstallerVersion that must be
+kept in sync with IDA_VERSION. The generated installer is named
+lmc-<version>-win32.exe and is written to lmc\setup. zip.bat runs zip.ps1 to
+build the portable archive lmc-<version>-win32.zip.
 
-Note: The custom build script will take care of this automatically.
-
-To debug a running application, run this command before attaching to the process:
-echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-
-This will be valid only for the current session. It has to be run again 
-after a log out or restart.
-
-For building the installer, run the bash script "setup" in lmc/setup/x11 folder.
-Make sure the scripts named "postinst", "postrm" and "prerm" in the folder
-package/DEBIAN have executable permission. The file "control" in the same folder 
-should be edited to reflect the proper version and installed size (in KB) of the 
-application. The scripts "lmc" and "whitelist" in package/usr/bin must also have 
-executable permission. All files and folder inside package folder must be owned 
-by root user.
-
-The setup script generates the deb installation package which will be saved to
-lmc/setup folder. The package will have the name lmc_<version>_i386.deb. For 
-generating rpm package, alien must be installed first. To install alien, run:
-sudo apt-get install alien 
-Execute "rpm_setup" script in lmc/setup/x11 to generate an rpm package from the 
-deb package (deb package must be created first). This package will have the name 
-lmc-<version>-2.i386.rpm and will be saved to lmc/setup folder.
+Signing: each released file is accompanied by the public key lmc-ashai.asc and
+a detached signature named after the full name of the signed file, e.g.
+lmc.exe -> lmc.exe.sig. See README.md.
 
 
-Mac OS X
---------
-Build directory for debug is lmc/debug.
-Build directory for release is lmc/release.
-lmc
- |-debug
- |-release
- |-src
+Linux/X11 (not part of the reference build)
+-------------------------------------------
+Build directory for debug is lmc/debug, for release lmc/release.
+The custom build script needs executable permission:
+  chmod 755 ./scripts/buildx11
 
-The custom build script needs executable permission. Run the following command:
-chmod 755 ./scripts/buildmacos
+Custom build step (Qt Creator):
+  Command: ./scripts/buildx11
+  Working directory: %{sourceDir}
+  Command arguments: %{buildDir}
 
-The custom build step needs the following parameters:
-Command: ./scripts/buildmacos
-Working directory: %{sourceDir}
-Command arguments: %{buildDir}/LAN-Messenger.app/Contents/MacOS
+For packaging, run the bash script "setup" in lmc/setup/x11 (and "rpm_setup"
+for an RPM package built from the deb with alien). The scripts named "postinst",
+"postrm" and "prerm" in package/DEBIAN must have executable permission, and the
+file "control" in the same folder should be edited to reflect the proper
+version and installed size.
 
-For building the installer, first run the bash script "createdisk" in 
-lmc/setup/mac folder. This will create a disk image and copy all the required 
-files needed for the application to it. Now open up the disk image, set the 
-background image, icon size (96x96), icon position, icon arrangment (Snap to 
-Grid) and window size. Now run the script "addlicense" to add the user license 
-and compress the disk image. The dmg file will have the name 
-lmc_<version>_intel.dmg and will be saved to lmc/setup folder.
+
+Mac OS X (not part of the reference build)
+------------------------------------------
+Build directory for debug is lmc/debug, for release lmc/release.
+The custom build script needs executable permission:
+  chmod 755 ./scripts/buildmacos
+
+Custom build step (Qt Creator):
+  Command: ./scripts/buildmacos
+  Working directory: %{sourceDir}
+  Command arguments: %{buildDir}/LAN-Messenger.app/Contents/MacOS
+
+For packaging, run the bash script "createdisk" in lmc/setup/mac, then set up
+the disk image and run "addlicense". The dmg file is named
+lmc_<version>_intel.dmg and is written to lmc/setup.
+
+---
+
+Modified by ASHAI, 2026.

@@ -1,11 +1,11 @@
 ﻿/****************************************************************************
 **
 ** This file is part of LAN Messenger.
-** 
+**
 ** Copyright (c) 2010 - 2012 Qualia Digital Solutions.
-** 
+**
 ** Contact:  qualiatech@gmail.com
-** 
+**
 ** LAN Messenger is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
@@ -25,72 +25,87 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
+#include <QObject>
 #include <QString>
-#include <QFile>
-#include <QDataStream>
 #include <QDateTime>
 #include <QList>
-#include "settings.h"
+#include <QSqlDatabase>
 
-#define HC_FILENAME		"messenger.db"
-#define HC_HDRSIZE		28
-#define HC_VERSION		1
-#define HC_DBMARKER		"DB"
-#define HC_IDMARKER		"ID"
-#define HC_DTMARKER		"DT"
+#define HC_FILENAME			"messenger.db"
+#define HC_SCHEMA_VERSION	2
+#define HC_LEGACY_PREFIX	"legacy:"
 
-struct DBHeader {
-	QString marker;
-	int version;
-	qint16 headerSize;
-	int count;
-	qint64 first;
-	qint64 last;
-
-	DBHeader() {
-		this->marker = HC_DBMARKER;
-		this->headerSize = HC_HDRSIZE;
-		this->version = HC_VERSION;
-	}
-
-	DBHeader(QString szMarker, qint16 nHeaderSize, int nVersion, int nCount, qint64 nFirst, qint64 nLast) {
-		this->marker = szMarker;
-		this->headerSize = nHeaderSize;
-		this->version = nVersion;
-		this->count = nCount;
-		this->first = nFirst;
-		this->last = nLast;
-	}
-};
-
-struct MsgInfo {
+//	Used only while migrating a legacy (pre-SQLite) history file
+struct LegacyRecord {
 	QString name;
-	QDateTime date;
-	qint64 offset;
+	qint64 date;
+	QString html;
 
-	MsgInfo() { }
-
-	MsgInfo(QString name, QDateTime date, qint64 offset) {
-		this->name = name;
-		this->date = date;
-		this->offset = offset;
-	}
+	LegacyRecord() : date(0) {}
+	LegacyRecord(const QString& n, qint64 d, const QString& h) : name(n), date(d), html(h) {}
 };
 
-class History {
+//	Describes a conversation peer stored in the history database
+struct PeerInfo {
+	QString id;
+	QString name;
+	bool isGroup;
+	qint64 lastTs;
+
+	PeerInfo() : isGroup(false), lastTs(0) {}
+};
+
+//	Describes a single history message
+struct HistoryMessage {
+	QString peerId;
+	QString peerName;
+	QString sender;
+	qint64 timestamp;
+	QString html;
+
+	HistoryMessage() : timestamp(0) {}
+};
+
+//	Single authoritative store of message history.
+//	The SQLite database is the one and only source of truth; every append is
+//	written through immediately. Open chat windows keep a live in-memory view
+//	that is cleared together with the store.
+class HistoryStore : public QObject {
+	Q_OBJECT
+
 public:
+	explicit HistoryStore(QObject* parent = 0);
+	~HistoryStore(void);
+
+	static HistoryStore* instance(void);
 	static QString historyFile(void);
-	static int save(QString user, QDateTime timeStamp, QString* lpszData);
-	static QList<MsgInfo> getList(void);
-	static QString getMessage(qint64 offset);
+	static QString legacyId(const QString& name);
+
+	bool open(QString* error = 0);
+	void close(void);
+	bool isOpen(void) const { return opened; }
+
+	QList<PeerInfo> peers(void);
+	QList<HistoryMessage> messages(const QString& peerId, const QString& peerName = QString());
+	bool append(const QString& peerId, const QString& peerName, bool isGroup,
+				const QString& sender, qint64 timestamp, const QString& html);
+	bool clearPeer(const QString& peerId, const QString& peerName = QString());
+	bool clearAll(void);
+
+signals:
+	void changed(const QString& peerId);
+	void cleared(const QString& peerId);
 
 private:
-	static void create(QString path);
-	static void writeHeader(QDataStream* pStream, DBHeader* pHeader);
-	static DBHeader readHeader(QDataStream* pStream);
-	static qint64 insertData(QDataStream* pStream, QString* lpszData);
-	static qint64 insertIndex(QDataStream* pStream, qint64 dataPos, QString user, QDateTime timeStamp);
-	static void updateIndex(QDataStream* pData, qint64 oldIndex, qint64 newIndex);
+	bool migrateLegacy(const QString& path, QString* error);
+	bool readLegacy(const QString& path, QList<LegacyRecord>& records, QString* error);
+	bool createSchema(QSqlDatabase& db, QString* error);
+	void configureConnection(QSqlDatabase& db);
+	void setError(QString* error, const QString& message);
+
+	QSqlDatabase db;
+	bool opened;
+	QString dbPath;
 };
 
 #endif // HISTORY_H

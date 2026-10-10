@@ -1,11 +1,11 @@
 ﻿/****************************************************************************
 **
 ** This file is part of LAN Messenger.
-** 
+**
 ** Copyright (c) 2010 - 2012 Qualia Digital Solutions.
-** 
+**
 ** Contact:  qualiatech@gmail.com
-** 
+**
 ** LAN Messenger is free software: you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation, either version 3 of the License, or
@@ -43,7 +43,8 @@ public:
     lmcHistoryWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
 	~lmcHistoryWindow();
 
-	void init(void);
+	void init(QString* lpszUserId = NULL, QString* lpszUserName = NULL);
+	void setFilter(QString* lpszUserId, QString* lpszUserName);
 	void updateList(void);
 	void stop(void);
 	void settingsChanged(void);
@@ -55,15 +56,25 @@ protected:
 private slots:
 	void tvMsgList_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
 	void btnClearHistory_clicked(void);
+	void txtSearch_textChanged(const QString& text);
 
 private:
 	void setUIText(void);
 	void displayList(void);
+	void loadConversation(const QString& peerId, const QString& peerName);
+	void refreshView(void);
+	void showSearchResults(void);
+	bool isFiltered(void) const;
 
 	Ui::HistoryWindow ui;
 	lmcSettings* pSettings;
 	lmcMessageLog* pMessageLog;
-	QList<MsgInfo> msgList;
+	QList<PeerInfo> peerList;
+	QString filterId;
+	QString filterName;
+	QString activeId;
+	QString activeName;
+	QString searchText;
 };
 
 #endif // HISTORYWINDOW_H

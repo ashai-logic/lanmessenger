@@ -19,6 +19,8 @@
 ** You should have received a copy of the GNU General Public License
 ** along with LAN Messenger.  If not, see <http://www.gnu.org/licenses/>.
 **
+** Modified by ASHAI, 2026.
+**
 ****************************************************************************/
 
 
@@ -44,6 +46,8 @@ void lmcAboutDialog::init(void) {
 	setWindowIcon(QIcon(IDR_APPICON));
 
 	pSettings = new lmcSettings();
+	//	Check the authorship and integrity of the application on every opening
+	signatureStatus = lmcSignature::verify();
 	setUIText();
 
 	ui.tabWidget->setCurrentIndex(0);
@@ -70,7 +74,8 @@ void lmcAboutDialog::setUIText(void) {
 	QString title = tr("About %1");
 	setWindowTitle(title.arg(lmcStrings::appName()));
 
-	ui.lblTitle->setText(lmcStrings::appName() + "\n" IDA_VERSION);
+	//	The fork brand is shown only here, in the About dialog.
+	ui.lblTitle->setText(lmcStrings::appName() + "\n" IDA_VERSION " " IDA_BRAND);
 	ui.lblLogoSmall->setPixmap(QPixmap(IDR_LOGOSMALL));
 #if defined(QT_NO_DEBUG)
 #define DEBUGINFO " "
@@ -83,8 +88,17 @@ void lmcAboutDialog::setUIText(void) {
                                   QSysInfo::productType(),
                                   QSysInfo::productVersion()));
 
-	QString description(lmcStrings::appDesc() + "\n\n");
-	description.append(IDA_COPYRIGHT "\n" IDA_DOMAIN);
+	//	Build rich text so that only the verification result is highlighted.
+	QString description(QString(lmcStrings::appDesc()).toHtmlEscaped());
+	description.replace("\n", "<br>");
+	description.append("<br><br>" + QString(IDA_COPYRIGHT).toHtmlEscaped());
+	description.append("<br><br>" +
+		tr("This is an unofficial fork of LAN Messenger and is not affiliated with or "
+		   "endorsed by Qualia Digital Solutions.").toHtmlEscaped());
+	description.append("<br>" + signatureText());
+	description.append("<br><br>");
+	description.append(tr("Source code:") + " " + QString(IDA_DOMAIN).toHtmlEscaped());
+	description.append("<br>" + tr("Contact:") + " " + QString(IDA_CONTACT).toHtmlEscaped());
 	ui.lblDescription->setText(description);
 
 	QFile thanks(IDR_THANKSTEXT);
@@ -98,4 +112,13 @@ void lmcAboutDialog::setUIText(void) {
 		ui.txtLicense->setPlainText(QString(license.readAll().constData()));
 		license.close();
 	}
+}
+
+QString lmcAboutDialog::signatureText(void) {
+	bool valid = (signatureStatus == SignatureValid);
+	QString color = valid ? "#008000" : "#cc0000";
+	QString status = valid ? tr("OK") : tr("FAILED");
+	//	Only the result itself is colored and bold, not the whole line.
+	return tr("Authorship and integrity verification:") +
+		" <span style=\"color:" + color + "; font-weight:bold;\">" + status + "</span>";
 }

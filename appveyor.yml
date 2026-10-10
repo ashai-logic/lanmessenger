@@ -1,17 +1,18 @@
+# LAN Messenger - Copyright (c) 2010 - 2012 Qualia Digital Solutions.
+# Modified by ASHAI, 2026.
+
 os: Visual Studio 2015
+
+# The reference build is done locally with the static Qt 5.12.12 / MinGW 7.3.0
+# tool chain (see README.md). OpenSSL is vendored in lmc\src\third_party\openssl,
+# so no separate OpenSSL installation is required.
 
 environment:
   matrix:
   - COMPILER: mingw32
-  - COMPILER: msvc2013_32
-  - COMPILER: msvc2013_64
 
 init:
   - set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%
-
-install:
-  - if [%COMPILER%]==[msvc2013_64] ( xcopy /E /I C:\OpenSSL-Win64 openssl )
-    else ( xcopy /E /I C:\OpenSSL-Win32 openssl )
 
 build_script:
   - call build_windows.bat %COMPILER%
